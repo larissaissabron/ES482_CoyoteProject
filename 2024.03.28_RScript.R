@@ -93,56 +93,46 @@ write.csv(coyote_data, "/Users/larissabron/Documents/BSc/23_24/Spring/BorealMamm
 
 # 2a. Plotting coyote total against each wide feature
 plot_1 <- coyote_data %>% 
-  ggplot(mapping = aes(x = conventional_seismic, y = coy_tot_det, color = site)) +
-  geom_point() +
-  facet_wrap(~site)
-
-plot_2 <- coyote_data %>% 
-  ggplot(mapping = aes(x = low_impact_seismic, y = coy_tot_det, color = site)) +
-  geom_point() +
-  facet_wrap(~site)
-
-plot_3 <- coyote_data %>% 
-  ggplot(mapping = aes(x = transmission_line, y = coy_tot_det, color = site)) +
-  geom_point() +
-  facet_wrap(~site)
-
-plot_4 <- coyote_data %>% 
   ggplot(mapping = aes(x = pipeline, y = coy_tot_det, color = site)) +
   geom_point() +
   facet_wrap(~site)
 
-plot_5 <- coyote_data %>% 
+plot_2 <- coyote_data %>% 
+  ggplot(mapping = aes(x = transmission_line, y = coy_tot_det, color = site)) +
+  geom_point() +
+  facet_wrap(~site)
+
+plot_3 <- coyote_data %>% 
   ggplot(mapping = aes(x = road_gravel_1l, y = coy_tot_det, color = site)) +
   geom_point() +
   facet_wrap(~site)
 
-plot_6 <- coyote_data %>% 
+plot_4 <- coyote_data %>% 
   ggplot(mapping = aes(x = road_gravel_2l, y = coy_tot_det, color = site)) +
   geom_point() +
   facet_wrap(~site)
 
-plot_7 <- coyote_data %>% 
+plot_5 <- coyote_data %>% 
   ggplot(mapping = aes(x = road_paved_undiv_2l, y = coy_tot_det, color = site)) +
   geom_point() +
   facet_wrap(~site)
 
-plot_8 <- coyote_data %>% 
+plot_6 <- coyote_data %>% 
   ggplot(mapping = aes(x = rlwy_sgl_track, y = coy_tot_det, color = site)) +
   geom_point() +
   facet_wrap(~site)
 
-plot_9 <- coyote_data %>% 
+plot_7 <- coyote_data %>% 
   ggplot(mapping = aes(x = road_paved_1l, y = coy_tot_det, color = site)) +
   geom_point() +
   facet_wrap(~site)
 
-plot_10 <- coyote_data %>% 
+plot_8 <- coyote_data %>% 
   ggplot(mapping = aes(x = road_paved_undiv_1l, y = coy_tot_det, color = site)) +
   geom_point() +
   facet_wrap(~site)
 
-plot_11 <- coyote_data %>% 
+plot_9 <- coyote_data %>% 
   ggplot(mapping = aes(x = road_winter, y = coy_tot_det, color = site)) +
   geom_point() +
   facet_wrap(~site)
@@ -155,119 +145,108 @@ figure_1 <- ggarrange(plot_1,
                       plot_6,
                       plot_7,
                       plot_8,
-                      plot_9,
-                      plot_10,
-                      plot_11)
+                      plot_9)
+figure_1
 
 # 2b. Plotting coyote proportional against each wide feature
-plot_12 <- coyote_data %>% 
-  ggplot(mapping = aes(x = conventional_seismic, y = coy_prop, color = site)) +
-  geom_point() +
-  facet_wrap(~site)
-
-plot_13 <- coyote_data %>% 
-  ggplot(mapping = aes(x = low_impact_seismic, y = coy_prop, color = site)) +
-  geom_point() +
-  facet_wrap(~site)
-
-plot_14 <- coyote_data %>% 
-  ggplot(mapping = aes(x = transmission_line, y = coy_prop, color = site)) +
-  geom_point() +
-  facet_wrap(~site)
-
-plot_15 <- coyote_data %>% 
+plot_10 <- coyote_data %>% 
   ggplot(mapping = aes(x = pipeline, y = coy_prop, color = site)) +
   geom_point() +
   facet_wrap(~site)
 
-plot_16 <- coyote_data %>% 
+plot_11 <- coyote_data %>% 
+  ggplot(mapping = aes(x = transmission_line, y = coy_prop, color = site)) +
+  geom_point() +
+  facet_wrap(~site)
+
+plot_12 <- coyote_data %>% 
   ggplot(mapping = aes(x = road_gravel_1l, y = coy_prop, color = site)) +
   geom_point() +
   facet_wrap(~site)
 
-plot_17 <- coyote_data %>% 
+plot_13 <- coyote_data %>% 
   ggplot(mapping = aes(x = road_gravel_2l, y = coy_prop, color = site)) +
   geom_point() +
   facet_wrap(~site)
 
-plot_18 <- coyote_data %>% 
+plot_14 <- coyote_data %>% 
   ggplot(mapping = aes(x = road_paved_undiv_2l, y = coy_prop, color = site)) +
   geom_point() +
   facet_wrap(~site)
 
-plot_19 <- coyote_data %>% 
+plot_15 <- coyote_data %>% 
   ggplot(mapping = aes(x = rlwy_sgl_track, y = coy_prop, color = site)) +
   geom_point() +
   facet_wrap(~site)
 
-plot_20 <- coyote_data %>% 
+plot_16 <- coyote_data %>% 
   ggplot(mapping = aes(x = road_paved_1l, y = coy_prop, color = site)) +
   geom_point() +
   facet_wrap(~site)
 
-plot_21 <- coyote_data %>% 
+plot_17 <- coyote_data %>% 
   ggplot(mapping = aes(x = road_paved_undiv_1l, y = coy_prop, color = site)) +
   geom_point() +
   facet_wrap(~site)
 
-plot_22 <- coyote_data %>% 
+plot_18 <- coyote_data %>% 
   ggplot(mapping = aes(x = road_winter, y = coy_prop, color = site)) +
   geom_point() +
   facet_wrap(~site)
 
-figure_2 <- ggarrange(plot_12,
+figure_2 <- ggarrange(plot_10,
+             plot_11,
+             plot_12,
              plot_13,
              plot_14,
              plot_15,
              plot_16,
              plot_17,
-             plot_18,
-             plot_19,
-             plot_20,
-             plot_21,
-             plot_22)
+             plot_18)
 figure_2 # Looks similar to 1, maybe not relevant to plot the proportion if it looks similar (or at least what I did for proportion)
 
 # 2c. Coyote total vs. natural feats 
 
-plot_22 <- coyote_data %>% 
+plot_19 <- coyote_data %>% 
   ggplot(mapping = aes(x = water, y = coy_tot_det, color = site)) +
   geom_point() +
   facet_wrap(~site)
 
-plot_23 <- coyote_data %>% 
+plot_20 <- coyote_data %>% 
   ggplot(mapping = aes(x = shrub, y = coy_tot_det, color = site)) +
   geom_point() +
   facet_wrap(~site)
 
-plot_24 <- coyote_data %>% 
+plot_21 <- coyote_data %>% 
   ggplot(mapping = aes(x = grass, y = coy_tot_det, color = site)) +
   geom_point() +
   facet_wrap(~site)
 
-plot_25 <- coyote_data %>% 
+plot_22 <- coyote_data %>% 
   ggplot(mapping = aes(x = conifer, y = coy_tot_det, color = site)) +
   geom_point() +
   facet_wrap(~site)
 
-plot_26 <- coyote_data %>% 
+plot_23 <- coyote_data %>% 
   ggplot(mapping = aes(x = broadleaf, y = coy_tot_det, color = site)) +
   geom_point() +
   facet_wrap(~site)
 
-plot_27 <- coyote_data %>% 
+plot_24 <- coyote_data %>% 
   ggplot(mapping = aes(x = mixed_forest, y = coy_tot_det, color = site)) +
   geom_point() +
   facet_wrap(~site)
 
-figure_3 <- ggarrange(plot_22,
+figure_3 <- ggarrange(plot_19,
+                      plot_20,
+                      plot_21,
+                      plot_22,
                       plot_23,
-                      plot_24,
-                      plot_25,
-                      plot_26,
-                      plot_27)
+                      plot_24)
 
 figure_3
 
 # 2d. Coyote total vs. narrow features
+
+
 # 2e. Coyote total vs each mammal
