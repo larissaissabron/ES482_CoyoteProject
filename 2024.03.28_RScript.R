@@ -84,8 +84,12 @@ coyote_data <- covariates %>%
          mixed_forest = lc_class230,
          conifer = lc_class210)
 
+# Save as a new .csv
+write.csv(coyote_data, "/Users/larissabron/Documents/BSc/23_24/Spring/BorealMammals/Project/RProject/data/processed/coyote_data.csv", row.names = FALSE)
 
 # 2. Visualizing Data -----------------------------------------------------
+
+# Visualizing how coyote data varies with different covariate sets (wide feats, narrow feats, natural feats, predator and prey) separated by land use area. 
 
 # 2a. Plotting coyote total against each wide feature
 plot_1 <- coyote_data %>% 
@@ -227,6 +231,43 @@ figure_2 # Looks similar to 1, maybe not relevant to plot the proportion if it l
 # 2c. Coyote total vs. natural feats 
 
 plot_22 <- coyote_data %>% 
-  ggplot(mapping = aes(x = road_winter, y = coy_prop, color = site)) +
+  ggplot(mapping = aes(x = water, y = coy_tot_det, color = site)) +
   geom_point() +
   facet_wrap(~site)
+
+plot_23 <- coyote_data %>% 
+  ggplot(mapping = aes(x = shrub, y = coy_tot_det, color = site)) +
+  geom_point() +
+  facet_wrap(~site)
+
+plot_24 <- coyote_data %>% 
+  ggplot(mapping = aes(x = grass, y = coy_tot_det, color = site)) +
+  geom_point() +
+  facet_wrap(~site)
+
+plot_25 <- coyote_data %>% 
+  ggplot(mapping = aes(x = conifer, y = coy_tot_det, color = site)) +
+  geom_point() +
+  facet_wrap(~site)
+
+plot_26 <- coyote_data %>% 
+  ggplot(mapping = aes(x = broadleaf, y = coy_tot_det, color = site)) +
+  geom_point() +
+  facet_wrap(~site)
+
+plot_27 <- coyote_data %>% 
+  ggplot(mapping = aes(x = mixed_forest, y = coy_tot_det, color = site)) +
+  geom_point() +
+  facet_wrap(~site)
+
+figure_3 <- ggarrange(plot_22,
+                      plot_23,
+                      plot_24,
+                      plot_25,
+                      plot_26,
+                      plot_27)
+
+figure_3
+
+# 2d. Coyote total vs. narrow features
+# 2e. Coyote total vs each mammal
