@@ -14,6 +14,7 @@ library(car)
 library(gridExtra)
 library(MASS)
 
+
 # 1b. Confirm working directory correct
 print(getwd())
 
@@ -86,7 +87,8 @@ coyote_data <- covariates %>%
          grass = lc_class110,
          broadleaf = lc_class220,
          mixed_forest = lc_class230,
-         conifer = lc_class210)
+         conifer = lc_class210) %>% 
+  na.omit() # Further down the line you are going to appreciate removing rows with NA values
 
 # Save as a new .csv
 write.csv(coyote_data, "/Users/larissabron/Documents/BSc/23_24/Spring/BorealMammals/Project/RProject/data/processed/coyote_data.csv", row.names = FALSE)
@@ -433,8 +435,8 @@ levene_results <- leveneTest(as.formula(paste0("~", paste(vars_to_test, collapse
 # H0
 summary(glm_H0)
 # = residual deviance / degrees of freedom
-1593.5/154
-# = 10, so overdispersed
+1554.8/151
+# = 10.2967, so overdispersed
 
 # H1 
 summary(glm_H1)
@@ -498,8 +500,8 @@ summary(glm_H0_2)
 
 # Chi square residual deviance
 # = residual deviance / degrees of freedom
-170.78/154
-# = 1.1090
+168.6/151
+# = 1.1167
 
 # H1: Coyotes like wide features, coyotes ~ pipeline + road_gravel_1l
 glm_H1_2 <- glm.nb(coy_tot_det ~ pipeline + road_gravel_1l,
@@ -599,4 +601,127 @@ summary(glm_H8_2)
 
 # Interpreting GLM output -------------------------------------------------
 
-# 
+# Odds ratio
+#To interpret the model coefficients we exponentiate them to get an odds ratio which represents the odds of an outcome occurring given a particular exposure (variable).The function for this is exp()
+
+#The interpretation for odds ratios is that odds ratios above 1 indicate a positive association and odds below 1 indicate a negative association, and the value of the exponentiated coefficient represents the change in odds of the response outcome given a unit increase in the explanatory variable.
+
+exp(coefficients(glm_H0_2))
+#(Intercept) 
+#6.5132
+
+exp(coefficients(glm_H1_2))
+#    (Intercept)       pipeline road_gravel_1l 
+#      4.9749692     24.3893188      0.5337732 
+
+exp(coefficients(glm_H2_2))
+#(Intercept)                    pipeline              road_gravel_1l 
+#4.98764721                   36.97208722                  0.09514351 
+#pipeline:wolf_tot_det   road_gravel_1l:wolf_tot_det 
+#0.46675735                   3.88116163 
+
+exp(coefficients(glm_H3_2))
+#(Intercept)       pipeline road_gravel_1l   deer_tot_det   hare_tot_det  moose_tot_det 
+#2.8589250       12.1055148      0.4550253      1.0169452      1.0102953      0.9604660 
+
+exp(coefficients(glm_H4_2))
+#(Intercept)                trail conventional_seismic vegetated_edge_roads 
+#37.53166481           0.07733961           0.08318467           0.02428499 
+
+exp(coefficients(glm_H5_2))
+#(Intercept)                             trail              conventional_seismic 
+#36.20867767                        0.10169855                        0.08401650 
+#vegetated_edge_roads                trail:wolf_tot_det conventional_seismic:wolf_tot_det 
+#0.02661336                        0.74727353                        1.07954818 
+#vegetated_edge_roads:wolf_tot_det 
+#0.94429497 
+
+exp(coefficients(glm_H6_2))
+#(Intercept)                trail conventional_seismic vegetated_edge_roads         deer_tot_det 
+#9.61790700           0.10987125           0.33008069           0.07731469           1.01705066 
+#hare_tot_det        moose_tot_det 
+#1.01027506           0.96455134 
+
+exp(coefficients(glm_H7_2))
+#(Intercept)             pipeline       road_gravel_1l                trail conventional_seismic 
+#24.21088763           7.78313693           0.01866062           0.11568007           0.11962463 
+#vegetated_edge_roads 
+#0.12021834 
+
+exp(coefficients(glm_H8_2))
+#(Intercept)        water        shrub        grass      conifer    broadleaf mixed_forest 
+#7.22654360   0.01645332   4.20999190   0.17254251   0.85211954   0.76310132   2.14414304
+
+# The odds ratio is interesting but I don't think it is as relevant as the predicted probabilities below. 
+
+# Don't need to scale our data because it is already in the form o --------
+
+# Predicted probabilities -------------------------------------------------
+
+# Recall, that when we choose a distribution to use with our GLM we also select a link function which maps the nonlinear relationship so that the linear model can be fit. This transformation is applied to the expected values so we have to use the proper inverse function to get predicted probabilities based on our model. Since we used a binomial distribution which uses the logit link function or log odds transformation, to get probabilities from our model we need to apply the inverse logit function. The function for this in R is plogis().
+
+plogis(coefficients(glm_H0_2))
+#(Intercept) 
+#0.8670 
+
+plogis(coefficients(glm_H1_2))
+#(Intercept)       pipeline road_gravel_1l 
+#  0.8326351      0.9606134      0.3480131 
+
+plogis(coefficients(glm_H2_2))
+#(Intercept)                    pipeline              road_gravel_1l 
+#  0.83298949                  0.97366487                  0.08687767 
+#pipeline:wolf_tot_det road_gravel_1l:wolf_tot_det 
+#  0.31822397                  0.79513073 
+
+plogis(coefficients(glm_H3_2))
+#(Intercept)       pipeline road_gravel_1l   deer_tot_det   hare_tot_det  moose_tot_det 
+#  0.7408605      0.9236962      0.3127267      0.5042007      0.5025607      0.4899172 
+
+plogis(coefficients(glm_H4_2))
+#(Intercept)                trail conventional_seismic vegetated_edge_roads 
+#  0.97404732           0.07178759           0.07679639           0.02370921 
+
+plogis(coefficients(glm_H5_2))
+#(Intercept)                             trail              conventional_seismic 
+#0.97312455                        0.09231069                        0.07750482 
+#vegetated_edge_roads                trail:wolf_tot_det conventional_seismic:wolf_tot_det 
+#0.02592345                        0.42767976                        0.51912631 
+#vegetated_edge_roads:wolf_tot_det 
+#0.48567475 
+
+plogis(coefficients(glm_H6_2))
+# (Intercept)                trail conventional_seismic vegetated_edge_roads         deer_tot_det 
+#  0.90581948           0.09899459           0.24816591           0.07176611           0.50422663 
+#hare_tot_det        moose_tot_det 
+#  0.50255564           0.49097793 
+
+plogis(coefficients(glm_H7_2))
+#(Intercept)             pipeline       road_gravel_1l                trail conventional_seismic 
+# 0.96033460           0.88614546           0.01831878           0.10368570           0.10684351 
+#vegetated_edge_roads 
+# 0.10731688 
+
+plogis(coefficients(glm_H8_2))
+#(Intercept)        water        shrub        grass      conifer    broadleaf mixed_forest 
+#  0.87844227   0.01618699   0.80806112   0.14715246   0.46007805   0.43281762   0.68194831
+
+# You can do even better with the predict function...just need to do some work 
+
+
+# Predict function --------------------------------------------------------
+# With this function we can generate a new data frame that shows the relationship between our explanatory variables and predicted probabilities of our response variable to graph for easier interpretation.
+
+# First we need to create a new data frame to add the predicted probabilities to. For each graph we want to generate we have to select one explanatory variable to plot (x-axis) which we will create set of values for that range from the minimum to the maximum value in our original data. The other variables are held constant at the mean to allow for accurate graphing and depiction of the relationship between the variable of interest and the response (predicted probability of our response)
+
+# first create a new data frame that includes all variables in the model (spelled EXACTLY the same) and where one variable (the one we want to graph) has a range from the min to max value in our data and the other variables are held constant at the mean value from the data.
+
+# Go through each model and set up new dataframes, add predict column
+
+###### ------- I tried this ^^^^ out and it really didn't work well with out data --------- 
+
+##### ------- New things
+
+# Obtain predicted values using the model
+predictions <- predict(glm_H1_2, type = "response")
+
