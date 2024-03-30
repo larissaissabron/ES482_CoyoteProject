@@ -9,6 +9,8 @@
 # 1a. Install packages
 library(tidyverse)
 library(ggpubr)
+library(PerformanceAnalytics)
+library(car)
 
 # 1b. Confirm working directory correct
 print(getwd())
@@ -35,7 +37,7 @@ total_detections <- read_csv("/Users/larissabron/Documents/BSc/23_24/Spring/Bore
       tolower() %>% 
       gsub(" ", "_", .)) # also get some underscores in there, dang
 
-# 1d. Bring together data you are interested in for coyote project
+# 1d. Bring together data you are interested in for coyote project (based on initial group interest)
 
 # Extract coyote-relevant data from species presence
 coy_tot_det <- total_detections %>%
@@ -94,48 +96,39 @@ write.csv(coyote_data, "/Users/larissabron/Documents/BSc/23_24/Spring/BorealMamm
 # 2a. Plotting coyote total against each wide feature
 plot_1 <- coyote_data %>% 
   ggplot(mapping = aes(x = pipeline, y = coy_tot_det, color = site)) +
-  geom_point() +
-  facet_wrap(~site)
+  geom_point() 
 
 plot_2 <- coyote_data %>% 
   ggplot(mapping = aes(x = transmission_line, y = coy_tot_det, color = site)) +
-  geom_point() +
-  facet_wrap(~site)
+  geom_point() 
 
 plot_3 <- coyote_data %>% 
   ggplot(mapping = aes(x = road_gravel_1l, y = coy_tot_det, color = site)) +
-  geom_point() +
-  facet_wrap(~site)
+  geom_point() 
 
 plot_4 <- coyote_data %>% 
   ggplot(mapping = aes(x = road_gravel_2l, y = coy_tot_det, color = site)) +
-  geom_point() +
-  facet_wrap(~site)
+  geom_point() 
 
 plot_5 <- coyote_data %>% 
   ggplot(mapping = aes(x = road_paved_undiv_2l, y = coy_tot_det, color = site)) +
-  geom_point() +
-  facet_wrap(~site)
+  geom_point() 
 
 plot_6 <- coyote_data %>% 
   ggplot(mapping = aes(x = rlwy_sgl_track, y = coy_tot_det, color = site)) +
-  geom_point() +
-  facet_wrap(~site)
+  geom_point() 
 
 plot_7 <- coyote_data %>% 
   ggplot(mapping = aes(x = road_paved_1l, y = coy_tot_det, color = site)) +
-  geom_point() +
-  facet_wrap(~site)
+  geom_point() 
 
 plot_8 <- coyote_data %>% 
   ggplot(mapping = aes(x = road_paved_undiv_1l, y = coy_tot_det, color = site)) +
-  geom_point() +
-  facet_wrap(~site)
+  geom_point() 
 
 plot_9 <- coyote_data %>% 
   ggplot(mapping = aes(x = road_winter, y = coy_tot_det, color = site)) +
-  geom_point() +
-  facet_wrap(~site)
+  geom_point() 
 
 figure_1 <- ggarrange(plot_1,
                       plot_2,
@@ -148,7 +141,7 @@ figure_1 <- ggarrange(plot_1,
                       plot_9)
 figure_1
 
-# 2b. Plotting coyote proportional against each wide feature
+# 2b. Plotting coyote proportional against each wide feature (i don't think this is a good way to visualize coyote proportional)
 plot_10 <- coyote_data %>% 
   ggplot(mapping = aes(x = pipeline, y = coy_prop, color = site)) +
   geom_point() +
@@ -209,33 +202,27 @@ figure_2 # Looks similar to 1, maybe not relevant to plot the proportion if it l
 
 plot_19 <- coyote_data %>% 
   ggplot(mapping = aes(x = water, y = coy_tot_det, color = site)) +
-  geom_point() +
-  facet_wrap(~site)
+  geom_point() 
 
 plot_20 <- coyote_data %>% 
   ggplot(mapping = aes(x = shrub, y = coy_tot_det, color = site)) +
-  geom_point() +
-  facet_wrap(~site)
+  geom_point()
 
 plot_21 <- coyote_data %>% 
   ggplot(mapping = aes(x = grass, y = coy_tot_det, color = site)) +
-  geom_point() +
-  facet_wrap(~site)
+  geom_point()
 
 plot_22 <- coyote_data %>% 
   ggplot(mapping = aes(x = conifer, y = coy_tot_det, color = site)) +
-  geom_point() +
-  facet_wrap(~site)
+  geom_point() 
 
 plot_23 <- coyote_data %>% 
   ggplot(mapping = aes(x = broadleaf, y = coy_tot_det, color = site)) +
-  geom_point() +
-  facet_wrap(~site)
+  geom_point() 
 
 plot_24 <- coyote_data %>% 
   ggplot(mapping = aes(x = mixed_forest, y = coy_tot_det, color = site)) +
-  geom_point() +
-  facet_wrap(~site)
+  geom_point() 
 
 figure_3 <- ggarrange(plot_19,
                       plot_20,
@@ -247,6 +234,90 @@ figure_3 <- ggarrange(plot_19,
 figure_3
 
 # 2d. Coyote total vs. narrow features
+plot_25 <- coyote_data %>% 
+  ggplot(mapping = aes(x = trail, y = coy_tot_det, color = site)) +
+  geom_point() 
 
+plot_26 <- coyote_data %>% 
+  ggplot(mapping = aes(x = conventional_seismic, y = coy_tot_det, color = site)) +
+  geom_point()
+
+plot_27 <- coyote_data %>% 
+  ggplot(mapping = aes(x = low_impact_seismic, y = coy_tot_det, color = site)) +
+  geom_point()
+
+plot_28 <- coyote_data %>% 
+  ggplot(mapping = aes(x = vegetated_edge_roads, y = coy_tot_det, color = site)) +
+  geom_point() 
+
+plot_29 <- coyote_data %>% 
+  ggplot(mapping = aes(x = vegetated_edge_railways, y = coy_tot_det, color = site)) +
+  geom_point() 
+
+plot_30 <- coyote_data %>% 
+  ggplot(mapping = aes(x = truck_trail, y = coy_tot_det, color = site)) +
+  geom_point() 
+
+plot_31 <- coyote_data %>% 
+  ggplot(mapping = aes(x = road_unclassified, y = coy_tot_det, color = site)) +
+  geom_point() 
+
+plot_32 <- coyote_data %>% 
+  ggplot(mapping = aes(x = road_unimproved, y = coy_tot_det, color = site)) +
+  geom_point() 
+
+figure_4 <- ggarrange(plot_25,
+                      plot_26,
+                      plot_27,
+                      plot_28,
+                      plot_29,
+                      plot_30,
+                      plot_31,
+                      plot_32)
+
+figure_4
 
 # 2e. Coyote total vs each mammal
+plot_33 <- coyote_data %>% 
+  ggplot(mapping = aes(x = moose_tot_det, y = coy_tot_det, color = site)) +
+  geom_point() 
+
+plot_34 <- coyote_data %>% 
+  ggplot(mapping = aes(x = hare_tot_det, y = coy_tot_det, color = site)) +
+  geom_point()
+
+plot_35 <- coyote_data %>% 
+  ggplot(mapping = aes(x = deer_tot_det, y = coy_tot_det, color = site)) +
+  geom_point()
+
+plot_36 <- coyote_data %>% 
+  ggplot(mapping = aes(x = wolf_tot_det, y = coy_tot_det, color = site)) +
+  geom_point() 
+
+figure_5 <- ggarrange(plot_33,
+                      plot_34,
+                      plot_35,
+                      plot_36)
+
+figure_5
+
+# From the figures above, it looks like the variables that could be of interest are: Wide - pipeline, road_gravel_1l; narrow - trail, conventional_seismic, vegetated_edge_roads; prey - moose, white-tailed_deer, hare; competitor - wolf. 
+
+# 2f.  How correlated are these variables?
+chart.Correlation(coyote_data[c("pipeline", "road_gravel_1l", "trail", "conventional_seismic", "vegetated_edge_roads", "wolf_tot_det", "deer_tot_det", "moose_tot_det", "coy_tot_det", "hare_tot_det", "coy_prop_abs", "coy_prop_pres", "wolf_prop_pres", "wolf_prop_abs", "deer_prop_abs", "deer_prop_pres", "moose_prop_pres", "moose_prop_abs")], 
+                  histogram = TRUE, 
+                  method = "pearson")
+
+# Interpreting correlation matrix (http://www.sthda.com/english/wiki/wiki.php?id_contents=7786)
+
+# --- Notes of things you would like to try still: 
+#2g. Rethink how you are doing coyote prop, could you compare presence vs. absence?
+#2h. Try all mammals for presence
+#2i. Try all features for presence
+#2j. Scratch everything you consider to be for the coyote project as currently imagined and visualize the covariates and mammal data
+
+# Motoring forward in the name of avoiding a rabbit hole
+
+# 3. Generalized linear models --------------------------------------------
+
+
