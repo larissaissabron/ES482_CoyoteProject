@@ -12,6 +12,7 @@ library(ggpubr)
 library(PerformanceAnalytics)
 library(car)
 library(gridExtra)
+library(MASS)
 
 # 1b. Confirm working directory correct
 print(getwd())
@@ -346,7 +347,9 @@ chart.Correlation(coyote_data[c("pipeline", "road_gravel_1l", "trail", "conventi
                   method = "spearman")
 ### Result: none of the covariates are highly correlated, aka r^2 > 0.7
 
-# GLM TIME
+
+# GLM TIME https://marissadyck.github.io/ES482-R-labs.github.io/mo --------
+
 
 # H0: Null
 glm_H0 <- glm(coy_tot_det ~ 1,
@@ -412,7 +415,8 @@ glm_H8 <- glm(coy_tot_det ~ water + shrub + grass + conifer + broadleaf + mixed_
 summary(glm_H8)
 
 
-# GLM assumptions continued 
+# GLM assumptions continued  ----------------------------------------------
+
 
 # Assumption 2 - homogeneity of variance using Levene's test
 # Specify the variables you want to test
@@ -444,6 +448,155 @@ summary(glm_H2)
 1356.3/147
 # = 9.2265 
 
-#####****-----CONTINUE HERE! Testing the residual deviance and interpreting. Marissa mentions if it is overdispersed to use the negative binomial distribution in the modelling. https://marissadyck.github.io/ES482-R-labs.github.io/mod_2_glm.html
+# H3
+summary(glm_H3)
+# = residual deviance / degrees of freedom
+1011.9/146
+# = 6.9308
 
-# Assumption 4 - Influential observations. **TBC
+# H4
+summary(glm_H4)
+# = residual deviance / degrees of freedom
+1395.3/148
+# = 9.4277
+
+# H5
+summary(glm_H5)
+# = residual deviance / degrees of freedom
+1385.2/145
+# = 9.5531
+
+# H6
+summary(glm_H6)
+# = residual deviance / degrees of freedom
+945.55/145
+# = 6.5210
+
+# H7
+summary(glm_H7)
+# = residual deviance / degrees of freedom
+1318.2/146
+# = 9.0288
+
+# H8
+summary(glm_H8)
+# = residual deviance / degrees of freedom
+1365.0/145
+# = 9.4138
+
+# Recap: So yeah, everything is overdispersed so redo the glm's as negative binomial model family (https://cran.r-project.org/web/packages/GlmSimulatoR/vignettes/count_data_and_overdispersion.html)
+
+
+# Redoing all the glms but this time as negative binomial  ----------------
+
+# H0: Null
+glm_H0_2 <- glm.nb(coy_tot_det ~ 1,
+                   data = coyote_data,
+                   link = "log")
+
+summary(glm_H0_2)
+
+# Chi square residual deviance
+# = residual deviance / degrees of freedom
+170.78/154
+# = 1.1090
+
+# H1: Coyotes like wide features, coyotes ~ pipeline + road_gravel_1l
+glm_H1_2 <- glm.nb(coy_tot_det ~ pipeline + road_gravel_1l,
+              data = coyote_data,
+              link = "log")
+
+summary(glm_H1_2)
+
+# Chi square residual deviance
+# = residual deviance / degrees of freedom
+169.02/149
+# = 1.1344
+
+# H2: Coyote use of wide features depends on the presence of wolf competitors, coyote ~ pipeline + road_gravel_1l + pipeline:wolf + road_gravel_1l:wolf
+glm_H2_2 <- glm.nb(coy_tot_det ~ pipeline + road_gravel_1l + pipeline:wolf_tot_det + road_gravel_1l:wolf_tot_det,
+              data = coyote_data,
+              link = "log")
+
+summary(glm_H2_2)
+# Chi square residual deviance
+# = residual deviance / degrees of freedom
+169.11/147
+# = 1.1505
+
+# H3: Coyote use of wide features varies with the presence of prey, coyote ~ pipeline + road_gravel_1l + deer_tot_det + hare_tot_det + moose_tot_det
+glm_H3_2 <- glm.nb(coy_tot_det ~ pipeline + road_gravel_1l + deer_tot_det + hare_tot_det + moose_tot_det,
+              data = coyote_data,
+              link = "log")
+
+summary(glm_H3_2)
+###Result: Warning messages:
+#1: glm.fit: algorithm did not converge 
+#2: In glm.nb(coy_tot_det ~ pipeline + road_gravel_1l + deer_tot_det +  :
+#               alternation limit reached
+
+# Chi square residual deviance
+# = residual deviance / degrees of freedom
+171.70/146
+# = 1.176027
+
+# H4: Coyotes like narrow features, coyote ~ trail + conventional_seismic + vegetated_edge_roads
+glm_H4_2 <- glm.nb(coy_tot_det ~ trail + conventional_seismic + vegetated_edge_roads,
+              data = coyote_data,
+              link = "log")
+
+summary(glm_H4_2)
+# Chi square residual deviance
+# = residual deviance / degrees of freedom
+168.76/148
+# = 1.1403
+
+# H5: Coyote use of narrow features depends on presence of competitors, coyote ~ trail + conventional_seismic + vegetated_edge_roads + trail:wolf_tot_det + conventional_seismic:wolf_tot_det + vegetated_edge_roads:wolf_tot_det
+glm_H5_2 <- glm.nb(coy_tot_det ~ trail + conventional_seismic + vegetated_edge_roads + trail:wolf_tot_det + conventional_seismic:wolf_tot_det + vegetated_edge_roads:wolf_tot_det,
+              data = coyote_data,
+              link = "log")
+
+summary(glm_H5_2)
+# Chi square residual deviance
+# = residual deviance / degrees of freedom
+168.73/145
+# = 1.1637
+
+# H6: Coyote use of narrow features also varies with the presence of prey, coyotes ~ trail + conventional_seismic + vegetated_edge_roads + deer + hare + moose
+glm_H6_2 <- glm.nb(coy_tot_det ~ trail + conventional_seismic + vegetated_edge_roads + deer_tot_det + hare_tot_det + moose_tot_det,
+              data = coyote_data,
+              link = "log")
+
+summary(glm_H6_2)
+# Chi square residual deviance
+# = residual deviance / degrees of freedom
+172.19/145
+# = 1.1875
+
+# H7: Coyotes like both wide and narrow features, coyote ~ pipeline + road_gravel_1l + trail + conventional seismic + vegetated_edge_roads
+glm_H7_2 <- glm.nb(coy_tot_det ~ pipeline + road_gravel_1l + trail + conventional_seismic + vegetated_edge_roads,
+              data = coyote_data,
+              link = "log")
+
+summary(glm_H7_2)
+# Chi square residual deviance
+# = residual deviance / degrees of freedom
+168.99/146
+# = 1.1575
+
+# H8: Baseline world without humans, coyotes ~ water + shrub + grass + conifer + broadleaf + mixed_forest
+glm_H8_2 <- glm.nb(coy_tot_det ~ water + shrub + grass + conifer + broadleaf + mixed_forest,
+              data = coyote_data,
+              link = "log")
+
+summary(glm_H8_2)
+# Chi square residual deviance
+# = residual deviance / degrees of freedom
+168.86/145
+# = 1.1646
+
+# Assumption 4 - Influential observations. **Swing back to this after getting things rolling.
+
+# Interpreting GLM output -------------------------------------------------
+
+# 
