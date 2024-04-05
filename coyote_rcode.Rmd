@@ -467,9 +467,9 @@ h8 <- glm(prop_vec ~ lc_class20 +
 
 summary(h8)
 
-# taking out developed land (slightly weaker than above aic = 732.84), taking out developed land and agriculture (weaker model, aic = 937.31)
+# taking out developed land and agriculture (slightly weaker than above aic = 732.84)
 h8a <- glm(prop_vec ~ lc_class20 +
-            lc_class33 + # high std. error (?)
+            lc_class33 + 
             #lc_class34 +
             lc_class50 +
             lc_class110 +
