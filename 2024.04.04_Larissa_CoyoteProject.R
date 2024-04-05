@@ -116,47 +116,155 @@ write.csv(project_data, "/Users/larissabron/Documents/BSc/23_24/Spring/BorealMam
 
 # 2. Visualizing Data -----------------------------------------------------
 
+
 # Visualizing how coyote data varies with different covariate sets (wide feats, narrow feats, natural feats, predator and prey) separated by land use area. 
+## Now inset the distribution of each feature by array - second plot per covariate.
+### Additional inset of distribution of each feature looking at the landscape - third plot per covariate. 
 
 # 2a. Plotting coyote total against each wide feature
+# Pipeline
 plot_1 <- project_data %>% 
   ggplot(mapping = aes(x = pipeline, y = coy_tot_det, color = array)) +
   geom_point() 
 
-#check it out
-print(plot_1)
+plot_44 <- project_data %>% 
+  ggplot(mapping = aes(x = array, y = pipeline, color = array)) +
+  geom_point()
 
+plot_79 <- project_data %>% 
+  ggplot(mapping = aes(x = site, y = pipeline, color = array)) +
+  geom_point() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 2))
+
+#check it out
+print(plot_79)
+
+# Transmission line
 plot_2 <- project_data %>% 
   ggplot(mapping = aes(x = transmission_line, y = coy_tot_det, color = array)) +
   geom_point() 
 
+plot_45 <- project_data %>% 
+  ggplot(mapping = aes(x = array, y = transmission_line, color = array)) +
+  geom_point()
+
+plot_80 <- project_data %>% 
+  ggplot(mapping = aes(x = site, y = transmission_line, color = array)) +
+  geom_point() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 2))
+
+print(plot_80)
+
+# Road gravel 1l
 plot_3 <- project_data %>% 
   ggplot(mapping = aes(x = road_gravel_1l, y = coy_tot_det, color = array)) +
   geom_point() 
 
+plot_46 <- project_data %>% 
+  ggplot(mapping = aes(x = array, y = road_gravel_1l, color = array)) +
+  geom_point()
+
+plot_81 <- project_data %>% 
+  ggplot(mapping = aes(x = site, y = road_gravel_1l, color = array)) +
+  geom_point() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 2))
+
+print(plot_81)
+
+# Road gravel 2l
 plot_4 <- project_data %>% 
   ggplot(mapping = aes(x = road_gravel_2l, y = coy_tot_det, color = array)) +
   geom_point() 
 
+plot_47 <- project_data %>% 
+  ggplot(mapping = aes(x = array, y = road_gravel_2l, color = array)) +
+  geom_point()
+
+plot_82 <- project_data %>% 
+  ggplot(mapping = aes(x = site, y = road_gravel_2l, color = array)) +
+  geom_point() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 2))
+
+# Road paved undiv 2l
 plot_5 <- project_data %>% 
   ggplot(mapping = aes(x = road_paved_undiv_2l, y = coy_tot_det, color = array)) +
   geom_point() 
 
+plot_48 <- project_data %>% 
+  ggplot(mapping = aes(x = array, y = road_paved_undiv_2l, color = array)) +
+  geom_point()
+
+plot_83 <- project_data %>% 
+  ggplot(mapping = aes(x = site, y = road_paved_undiv_2l, color = array)) +
+  geom_point() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 2))
+
+print(plot_48)
+
+# rlwy sgl track 
 plot_6 <- project_data %>% 
   ggplot(mapping = aes(x = rlwy_sgl_track, y = coy_tot_det, color = array)) +
   geom_point() 
 
+plot_49 <- project_data %>% 
+  ggplot(mapping = aes(x = array, y = rlwy_sgl_track, color = array)) +
+  geom_point()
+
+plot_84 <- project_data %>% 
+  ggplot(mapping = aes(x = site, y = rlwy_sgl_track, color = array)) +
+  geom_point() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 2))
+
+print(plot_49)
+
+# road paved 1l
 plot_7 <- project_data %>% 
   ggplot(mapping = aes(x = road_paved_1l, y = coy_tot_det, color = array)) +
-  geom_point() 
+  geom_point() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 2))
 
+plot_50 <- project_data %>% 
+  ggplot(mapping = aes(x = array, y = road_paved_1l, color = array)) +
+  geom_point()
+
+plot_85 <- project_data %>% 
+  ggplot(mapping = aes(x = site, y = road_paved_1l, color = array)) +
+  geom_point() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 2))
+
+print(plot_50)
+
+# road paved undiv 1l
 plot_8 <- project_data %>% 
   ggplot(mapping = aes(x = road_paved_undiv_1l, y = coy_tot_det, color = array)) +
   geom_point() 
 
+plot_51 <- project_data %>% 
+  ggplot(mapping = aes(x = array, y = road_paved_undiv_1l, color = array)) +
+  geom_point()
+
+plot_86 <- project_data %>% 
+  ggplot(mapping = aes(x = site, y = road_paved_undiv_1l, color = array)) +
+  geom_point() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 2))
+
+print(plot_51)
+
+# road winter
 plot_9 <- project_data %>% 
   ggplot(mapping = aes(x = road_winter, y = coy_tot_det, color = array)) +
   geom_point() 
+
+plot_52 <- project_data %>% 
+  ggplot(mapping = aes(x = array, y = road_winter, color = array)) +
+  geom_point()
+
+plot_87 <- project_data %>% 
+  ggplot(mapping = aes(x = site, y = road_winter, color = array)) +
+  geom_point() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 2))
+
+print(plot_87)
 
 figure_1 <- ggarrange(plot_1,
                       plot_2,
@@ -168,34 +276,116 @@ figure_1 <- ggarrange(plot_1,
                       plot_8,
                       plot_9)
 
-# Compare all together
-figure_1
+figure_6 <- ggarrange(plot_44,
+                      plot_45,
+                      plot_46,
+                      plot_47,
+                      plot_48,
+                      plot_49,
+                      plot_50,
+                      plot_51,
+                      plot_52)
+
+figure_10 <- ggarrange(plot_79,
+                      plot_80,
+                      plot_81,
+                      plot_82,
+                      plot_83,
+                      plot_84,
+                      plot_85,
+                      plot_86,
+                      plot_87)
+
+print(figure_10)
 
 # 2b. Coyote total vs. natural feats 
+## Now inset the distribution of each feature by array.
 
+# water
 plot_19 <- project_data %>% 
   ggplot(mapping = aes(x = water, y = coy_tot_det, color = array)) +
   geom_point() 
 
+plot_53 <- project_data %>% 
+  ggplot(mapping = aes(x = array, y = water, color = array)) +
+  geom_point()
+
+plot_88 <- project_data %>% 
+  ggplot(mapping = aes(x = site, y = water, color = array)) +
+  geom_point() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 2))
+
+plot_88
+
+# Shrub
 plot_20 <- project_data %>% 
   ggplot(mapping = aes(x = shrub, y = coy_tot_det, color = array)) +
   geom_point()
 
+plot_54 <- project_data %>% 
+  ggplot(mapping = aes(x = array, y = shrub, color = array)) +
+  geom_point()
+
+plot_89 <- project_data %>% 
+  ggplot(mapping = aes(x = site, y = shrub, color = array)) +
+  geom_point() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 2))
+
+# grass 
 plot_21 <- project_data %>% 
   ggplot(mapping = aes(x = grass, y = coy_tot_det, color = array)) +
   geom_point()
 
+plot_55 <- project_data %>% 
+  ggplot(mapping = aes(x = array, y = grass, color = array)) +
+  geom_point()
+
+plot_90 <- project_data %>% 
+  ggplot(mapping = aes(x = site, y = grass, color = array)) +
+  geom_point() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 2))
+
+# conifer
 plot_22 <- project_data %>% 
   ggplot(mapping = aes(x = conifer, y = coy_tot_det, color = array)) +
   geom_point() 
 
+plot_56 <- project_data %>% 
+  ggplot(mapping = aes(x = array, y = grass, color = array)) +
+  geom_point()
+
+plot_91 <- project_data %>% 
+  ggplot(mapping = aes(x = site, y = conifer, color = array)) +
+  geom_point() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 2))
+
+# broadleaf
 plot_23 <- project_data %>% 
   ggplot(mapping = aes(x = broadleaf, y = coy_tot_det, color = array)) +
   geom_point() 
 
+plot_57 <- project_data %>% 
+  ggplot(mapping = aes(x = array, y = broadleaf, color = array)) +
+  geom_point()
+
+plot_92 <- project_data %>% 
+  ggplot(mapping = aes(x = site, y = broadleaf, color = array)) +
+  geom_point() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 2))
+
+# mixed forest
 plot_24 <- project_data %>% 
   ggplot(mapping = aes(x = mixed_forest, y = coy_tot_det, color = array)) +
   geom_point() 
+
+plot_58 <- project_data %>% 
+  ggplot(mapping = aes(x = array, y = mixed_forest, color = array)) +
+  geom_point()
+
+plot_93 <- project_data %>% 
+  ggplot(mapping = aes(x = site, y = mixed_forest, color = array)) +
+  geom_point() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 2))
 
 figure_3 <- ggarrange(plot_19,
                       plot_20,
@@ -204,40 +394,134 @@ figure_3 <- ggarrange(plot_19,
                       plot_23,
                       plot_24)
 
-figure_3
+figure_7 <- ggarrange(plot_53,
+                      plot_54,
+                      plot_55,
+                      plot_56,
+                      plot_57,
+                      plot_58)
+
+figure_11 <- ggarrange(plot_88,
+                      plot_89,
+                      plot_90,
+                      plot_91,
+                      plot_92,
+                      plot_93)
 
 # 2d. Coyote total vs. narrow features
+## Now inset the distribution of each feature by array.
+
+#trail
 plot_25 <- project_data %>% 
   ggplot(mapping = aes(x = trail, y = coy_tot_det, color = array)) +
   geom_point() 
 
+plot_59 <- project_data %>% 
+  ggplot(mapping = aes(x = array, y = trail, color = array)) +
+  geom_point()
+
+plot_94 <- project_data %>% 
+  ggplot(mapping = aes(x = site, y = trail, color = array)) +
+  geom_point() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 2))
+
+# conventional seismic
 plot_26 <- project_data %>% 
   ggplot(mapping = aes(x = conventional_seismic, y = coy_tot_det, color = array)) +
   geom_point()
 
+plot_60 <- project_data %>% 
+  ggplot(mapping = aes(x = array, y = conventional_seismic, color = array)) +
+  geom_point()
+
+plot_95 <- project_data %>% 
+  ggplot(mapping = aes(x = site, y = conventional_seismic, color = array)) +
+  geom_point() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 2))
+
+# low impact seismic
 plot_27 <- project_data %>% 
   ggplot(mapping = aes(x = low_impact_seismic, y = coy_tot_det, color = array)) +
   geom_point()
 
+plot_61 <- project_data %>% 
+  ggplot(mapping = aes(x = array, y = low_impact_seismic, color = array)) +
+  geom_point()
+
+plot_96 <- project_data %>% 
+  ggplot(mapping = aes(x = site, y = low_impact_seismic, color = array)) +
+  geom_point() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 2))
+
+# vegetated edge roads
 plot_28 <- project_data %>% 
   ggplot(mapping = aes(x = vegetated_edge_roads, y = coy_tot_det, color = array)) +
   geom_point() 
 
+plot_62 <- project_data %>% 
+  ggplot(mapping = aes(x = array, y = vegetated_edge_roads, color = array)) +
+  geom_point()
+
+plot_97 <- project_data %>% 
+  ggplot(mapping = aes(x = site, y = vegetated_edge_roads, color = array)) +
+  geom_point() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 2))
+
+# Vegetated edge railways
 plot_29 <- project_data %>% 
   ggplot(mapping = aes(x = vegetated_edge_railways, y = coy_tot_det, color = array)) +
   geom_point() 
 
+plot_63 <- project_data %>% 
+  ggplot(mapping = aes(x = array, y = vegetated_edge_railways, color = array)) +
+  geom_point()
+
+plot_98 <- project_data %>% 
+  ggplot(mapping = aes(x = site, y = vegetated_edge_railways, color = array)) +
+  geom_point() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 2))
+
+# truck trail
 plot_30 <- project_data %>% 
   ggplot(mapping = aes(x = truck_trail, y = coy_tot_det, color = array)) +
   geom_point() 
 
+plot_64 <- project_data %>% 
+  ggplot(mapping = aes(x = array, y = truck_trail, color = array)) +
+  geom_point()
+
+plot_99 <- project_data %>% 
+  ggplot(mapping = aes(x = site, y = truck_trail, color = array)) +
+  geom_point() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 2))
+
+#road unclassified
 plot_31 <- project_data %>% 
   ggplot(mapping = aes(x = road_unclassified, y = coy_tot_det, color = array)) +
   geom_point() 
 
+plot_65 <- project_data %>% 
+  ggplot(mapping = aes(x = array, y = road_unclassified, color = array)) +
+  geom_point()
+
+plot_100 <- project_data %>% 
+  ggplot(mapping = aes(x = site, y = road_unclassified, color = array)) +
+  geom_point() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 2))
+
+# road unimproved
 plot_32 <- project_data %>% 
   ggplot(mapping = aes(x = road_unimproved, y = coy_tot_det, color = array)) +
   geom_point() 
+
+plot_66 <- project_data %>% 
+  ggplot(mapping = aes(x = array, y = road_unimproved, color = array)) +
+  geom_point()
+
+plot_101 <- project_data %>% 
+  ggplot(mapping = aes(x = site, y = road_unimproved, color = array)) +
+  geom_point() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 2))
 
 figure_4 <- ggarrange(plot_25,
                       plot_26,
@@ -248,52 +532,193 @@ figure_4 <- ggarrange(plot_25,
                       plot_31,
                       plot_32)
 
-figure_4
+figure_8 <- ggarrange(plot_59,
+                      plot_60,
+                      plot_61,
+                      plot_62,
+                      plot_63,
+                      plot_64,
+                      plot_65,
+                      plot_66)
+
+figure_12 <- ggarrange(plot_94,
+                      plot_95,
+                      plot_96,
+                      plot_97,
+                      plot_98,
+                      plot_99,
+                      plot_100,
+                      plot_101)
+
+figure_12
 
 # 2e. Coyote total vs each mammal
+## Now inset the distribution of each feature by array.
+
+# Moose
 plot_33 <- project_data %>% 
   ggplot(mapping = aes(x = moose_tot_det, y = coy_tot_det, color = array)) +
   geom_point() 
 
+plot_67 <- project_data %>% 
+  ggplot(mapping = aes(x = array, y = moose_tot_det, color = array)) +
+  geom_point()
+
+plot_102 <- project_data %>% 
+  ggplot(mapping = aes(x = site, y = moose_tot_det, color = array)) +
+  geom_point() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 2))
+
+# Hare
 plot_34 <- project_data %>% 
   ggplot(mapping = aes(x = hare_tot_det, y = coy_tot_det, color = array)) +
   geom_point()
 
+plot_68 <- project_data %>% 
+  ggplot(mapping = aes(x = array, y = hare_tot_det, color = array)) +
+  geom_point()
+
+plot_103 <- project_data %>% 
+  ggplot(mapping = aes(x = site, y = hare_tot_det, color = array)) +
+  geom_point() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 2))
+
+# deer
 plot_35 <- project_data %>% 
   ggplot(mapping = aes(x = deer_tot_det, y = coy_tot_det, color = array)) +
   geom_point()
 
+plot_69 <- project_data %>% 
+  ggplot(mapping = aes(x = array, y = deer_tot_det, color = array)) +
+  geom_point()
+
+plot_104 <- project_data %>% 
+  ggplot(mapping = aes(x = site, y = deer_tot_det, color = array)) +
+  geom_point() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 2))
+
+# wolf
 plot_36 <- project_data %>% 
   ggplot(mapping = aes(x = wolf_tot_det, y = coy_tot_det, color = array)) +
   geom_point() 
 
+plot_70 <- project_data %>% 
+  ggplot(mapping = aes(x = array, y = wolf_tot_det, color = array)) +
+  geom_point()
+
+plot_105 <- project_data %>% 
+  ggplot(mapping = aes(x = site, y = wolf_tot_det, color = array)) +
+  geom_point() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 2))
+
+# bear 
 plot_37 <- project_data %>% 
   ggplot(mapping = aes(x = bear_tot_det, y = coy_tot_det, color = array)) +
   geom_point() 
 
+plot_71 <- project_data %>% 
+  ggplot(mapping = aes(x = array, y = bear_tot_det, color = array)) +
+  geom_point()
+
+plot_106 <- project_data %>% 
+  ggplot(mapping = aes(x = site, y = bear_tot_det, color = array)) +
+  geom_point() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 2))
+
+# squirrel
 plot_38 <- project_data %>% 
   ggplot(mapping = aes(x = squirrel_tot_det, y = coy_tot_det, color = array)) +
   geom_point() 
 
+plot_72 <- project_data %>% 
+  ggplot(mapping = aes(x = array, y = squirrel_tot_det, color = array)) +
+  geom_point()
+
+plot_107 <- project_data %>% 
+  ggplot(mapping = aes(x = site, y = squirrel_tot_det, color = array)) +
+  geom_point() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 2))
+
+
+# lynx
 plot_39 <- project_data %>% 
   ggplot(mapping = aes(x = lynx_tot_det, y = coy_tot_det, color = array)) +
   geom_point() 
 
+plot_73 <- project_data %>% 
+  ggplot(mapping = aes(x = array, y =lynx_tot_det, color = array)) +
+  geom_point()
+
+plot_108 <- project_data %>% 
+  ggplot(mapping = aes(x = site, y = lynx_tot_det, color = array)) +
+  geom_point() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 2))
+
+# fox
 plot_40 <- project_data %>% 
   ggplot(mapping = aes(x = fox_tot_det, y = coy_tot_det, color = array)) +
   geom_point() 
 
+plot_74 <- project_data %>% 
+  ggplot(mapping = aes(x = array, y = fox_tot_det, color = array)) +
+  geom_point()
+
+plot_109 <- project_data %>% 
+  ggplot(mapping = aes(x = site, y = fox_tot_det, color = array)) +
+  geom_point() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 2))
+
+# caribou
 plot_41 <- project_data %>% 
   ggplot(mapping = aes(x = caribou_tot_det, y = coy_tot_det, color = array)) +
   geom_point() 
 
+plot_75 <- project_data %>% 
+  ggplot(mapping = aes(x = array, y = caribou_tot_det, color = array)) +
+  geom_point()
+
+plot_110 <- project_data %>% 
+  ggplot(mapping = aes(x = site, y = caribou_tot_det, color = array)) +
+  geom_point() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 2))
+
+# owl
 plot_42 <- project_data %>% 
-  ggplot(mapping = aes(x = owl_tot_det, y = coy_tot_det, color = array)) +
+  ggplot(mapping = aes(x = owl_tot_det, y = caribou_tot_det, color = array)) +
   geom_point() 
 
+plot_76 <- project_data %>% 
+  ggplot(mapping = aes(x = array, y = owl_tot_det, color = array)) +
+  geom_point()
+
+plot_111 <- project_data %>% 
+  ggplot(mapping = aes(x = site, y = owl_tot_det, color = array)) +
+  geom_point() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 2))
+
+# cougar
 plot_43 <- project_data %>% 
   ggplot(mapping = aes(x = cougar_tot_det, y = coy_tot_det, color = array)) +
   geom_point() 
+
+plot_77 <- project_data %>% 
+  ggplot(mapping = aes(x = array, y = cougar_tot_det, color = array)) +
+  geom_point()
+
+plot_112 <- project_data %>% 
+  ggplot(mapping = aes(x = site, y = cougar_tot_det, color = array)) +
+  geom_point() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 2))
+
+# coyote
+plot_78 <- project_data %>% 
+  ggplot(mapping = aes(x = array, y = coy_tot_det, color = array)) +
+  geom_point()
+
+plot_113 <- project_data %>% 
+  ggplot(mapping = aes(x = site, y = coy_tot_det, color = array)) +
+  geom_point() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 2))
 
 figure_5 <- ggarrange(plot_33,
                       plot_34,
@@ -307,11 +732,45 @@ figure_5 <- ggarrange(plot_33,
                       plot_42,
                       plot_43)
 
-figure_5
+figure_9 <- ggarrange(plot_67,
+                      plot_68,
+                      plot_69,
+                      plot_70,
+                      plot_71,
+                      plot_72,
+                      plot_73,
+                      plot_74,
+                      plot_75,
+                      plot_76,
+                      plot_77,
+                      plot_78)
+
+figure_13 <- ggarrange(plot_102,
+                      plot_103,
+                      plot_104,
+                      plot_105,
+                      plot_106,
+                      plot_107,
+                      plot_108,
+                      plot_109,
+                      plot_110,
+                      plot_111,
+                      plot_112,
+                      plot_113)
+
+figure_13
 
 # Before April 3rd ---- old ---- From the figures above, it looks like the variables that could be of interest are: Wide - pipeline, road_gravel_1l; narrow - trail, conventional_seismic, vegetated_edge_roads, ; prey - moose, white-tailed_deer, hare; competitor - wolf. 
 
-# After April 3rd ---- new ---- Features of interest would be... Wide: pipeline, road_gravel_1l; Narrow: trail, conventional seismic, vegetated edge roads, road_unimproved; Natural: shrub, grass, conifer, broadleaf, mixed_forest, water (even though low, want to keep all natural for “world without humans” candidate model); Animals - Prey: moose, hare, deer; Competitor: wolf; - Bonus consideration due to associations (not added below yet): black bear, lynx, red squirrel
+# After April 3rd ---- new ---- Features of interest based on seeing number of coyote  captures vs. each feature would be... Wide: pipeline, road_gravel_1l; Narrow: trail, conventional seismic, vegetated edge roads, road_unimproved; Natural: shrub, grass, conifer, broadleaf, mixed_forest, water (even though low, want to keep all natural for “world without humans” candidate model); Animals - Prey: moose, hare, deer; Competitor: wolf; - Bonus consideration due to associations (not added below yet): black bear, lynx, red squirrel
+
+# April 5: I added in plotting each potential covariate against the array, showing the amount of each present as each camera separated by array. This may be a more full picture of whats going on instead of just "cherry picking" what works with coyote. 
+
+#### Wide features: landscape unit, or array, 21 doesn't have much of anything for wide features, could be could to compare as the "baseline." Transmission line may be good to add, as well as road_gravel_2l - though maybe add it to road_gravel_1l?
+
+### Natural features: 
+
+### Overall: After visualizing, it could be good to get the median values for each covariate of interest at each landscape unit/array. 
 
 # 3. Generalized linear models, Poisson for count data --------------------------------------------
 
