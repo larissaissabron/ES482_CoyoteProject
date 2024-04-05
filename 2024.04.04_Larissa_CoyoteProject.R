@@ -153,8 +153,6 @@ plot_80 <- project_data %>%
   geom_point() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 2))
 
-print(plot_80)
-
 # Road gravel 1l
 plot_3 <- project_data %>% 
   ggplot(mapping = aes(x = road_gravel_1l, y = coy_tot_det, color = array)) +
@@ -764,13 +762,18 @@ figure_13
 
 # After April 3rd ---- new ---- Features of interest based on seeing number of coyote  captures vs. each feature would be... Wide: pipeline, road_gravel_1l; Narrow: trail, conventional seismic, vegetated edge roads, road_unimproved; Natural: shrub, grass, conifer, broadleaf, mixed_forest, water (even though low, want to keep all natural for “world without humans” candidate model); Animals - Prey: moose, hare, deer; Competitor: wolf; - Bonus consideration due to associations (not added below yet): black bear, lynx, red squirrel
 
-# April 5: I added in plotting each potential covariate against the array, showing the amount of each present as each camera separated by array. This may be a more full picture of whats going on instead of just "cherry picking" what works with coyote. 
+# April 5: I added in plotting each potential covariate against the array, showing the amount of each present as each camera separated by array. This may be a more full picture of whats going on instead of just "cherry picking" what works with coyote. Also did a third plot of amount of each covariate present by camera, giving a view of the camera as a landscape. 
+### Review notes in shared Google Doc
 
-#### Wide features: landscape unit, or array, 21 doesn't have much of anything for wide features, could be could to compare as the "baseline." Transmission line may be good to add, as well as road_gravel_2l - though maybe add it to road_gravel_1l?
+# 2e. Descriptive stats
+counts <- sapply(project_data, function(col) {
+  count_zero <- sum(col == 0)
+  count_nonzero <- sum(col != 0)
+  percent_nonzero <- (count_nonzero / length(col))*100  # Proportion of non-zero entries
+  c(count_zero = count_zero, count_nonzero = count_nonzero, prop_nonzero = prop_nonzero)
+})
 
-### Natural features: 
-
-### Overall: After visualizing, it could be good to get the median values for each covariate of interest at each landscape unit/array. 
+counts
 
 # 3. Generalized linear models, Poisson for count data --------------------------------------------
 
