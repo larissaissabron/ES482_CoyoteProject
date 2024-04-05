@@ -1,0 +1,489 @@
+---
+title: "es482 exploring"
+author: "rhianwallace"
+date: "`r Sys.Date()`"
+output: html_document
+---
+# packages and dataframes
+```{r}
+library(tidyverse)
+library(tidyr)
+library(ggplot2)
+library(PerformanceAnalytics)
+library(gridExtra)
+
+covariates <- read_csv("OSM_2022_covariates.csv")
+
+p_detects <- read_csv("OSM_2022_proportional_detections.csv")
+
+species_pres <- read_csv("OSM_2022_species_presence.csv") %>% 
+    set_names(
+    names(.) %>%  
+      tolower()) 
+
+total_detect <- read_csv("OSM_2022_total_detections.csv") %>% 
+    set_names(
+    names(.) %>%  
+      tolower()) 
+```
+
+# covariance testing
+```{r}
+#linear features testing
+cov_cor <- 
+  covariates %>% 
+  select(trail,
+         conventional_seismic,
+         pipeline,
+         transmission_line,
+         clearing_unknown,
+         vegetated_edge_roads,
+         road_unimproved,
+         road_gravel_1l,
+         road_gravel_2l,
+         truck_trail,
+         road_paved_undiv_2l,
+         road_unclassified,
+         runway,
+         low_impact_seismic,
+         surrounding_veg,
+         vegetated_edge_railways,
+         landfill,
+         road_paved_1l,
+         #road_winter,
+         airp_runway,
+         rlwy_sgl_track
+         )
+
+chart.Correlation(cov_cor, 
+                  histogram = TRUE, 
+                  method = "pearson")
+
+# pipeline and transmission_line (.67 correlation)
+# vegetated_edge_roads and road_gravel_2l (.65 correlation)
+
+
+chart.Correlation(cov_cor, 
+                  histogram = TRUE, 
+                  method = "spearman")
+
+# vegetated_edge_roads and pipeline (.7 correlation - use pipeline only)
+
+
+```
+
+# joining data
+```{r}
+# covariates joined with detects and presence dfs
+pdc <- data.frame(site = p_detects$site, coy1 = p_detects$coyote, coy0 = p_detects$absent_coyote)
+spc <- data.frame(site = species_pres$site, ccountp = species_pres$coyote)
+tdc <- data.frame(site = total_detect$site, tot_det = total_detect$coyote, 
+                  wolf = total_detect$`grey wolf`, hare = total_detect$`snowshoe hare`, 
+                  deer = total_detect$`white-tailed deer`, moose = total_detect$moose,
+                  fox = total_detect$`red fox`)
+
+coy_full <- covariates %>% 
+  left_join(pdc, by = "site") %>%
+  relocate(coy1, 
+           .after = site) %>%
+  relocate(coy0,
+           .after = coy1) %>%
+  left_join(spc, by = "site") %>%
+  relocate(ccountp, 
+           .after = site) %>%
+  left_join(tdc, by = "site") %>%
+  relocate(tot_det, .after = site)
+
+# adding a proportion present column
+coy_full$c_prop_pres <- (coy_full$coy1)/12 
+
+coy_full <- coy_full %>% relocate(c_prop_pres, .after = coy0)
+
+# removing unnecessary columns
+coy_full_ed <- coy_full %>% 
+  
+  #selecting useful columns
+  select(site, tot_det, ccountp, coy1, coy0, c_prop_pres, buff_dist, 
+         trail, conventional_seismic, pipeline, transmission_line,
+         clearing_unknown,road_unimproved, road_gravel_1l, road_gravel_2l, truck_trail,
+         road_paved_undiv_2l,road_unclassified, low_impact_seismic, road_paved_1l, 
+         road_paved_undiv_1l, lc_class110,lc_class120, lc_class20, lc_class33,
+         lc_class34, lc_class50, lc_class210, lc_class220, lc_class230, wolf, 
+         hare, deer, moose, fox) 
+
+# filtering to 1km buff site
+coy_1k <- coy_full_ed %>%
+  filter(buff_dist == 1000)
+
+# coy_full = all covariates
+# coy_full_ed = selected lf and lc
+# coy_1k = 1k buffer dist
+```
+
+# visualisations
+```{r}
+# create a vector of linear feature strings
+explanatory = c("trail",
+         "conventional_seismic",
+         'pipeline',
+         'transmission_line',
+         'clearing_unknown',
+         'road_unimproved',
+         'road_gravel_1l',
+         'road_gravel_2l',
+         'truck_trail',
+         'road_paved_undiv_2l',
+         'road_unclassified',
+         'low_impact_seismic',
+         'road_paved_1l')
+
+# create multiple plots for total detections in 1k buff dist (transmission line and road gravel 1l appear to have linear relationships)
+plots_td <- list()
+for (ii in 1:length(explanatory)) {
+  plots_td[[ii]] <- ggplot(coy_1k, aes_string(x = explanatory[ii], y = "tot_det")) +
+    geom_point()
+}
+
+grid.arrange(plots_td[[1]], plots_td[[2]], plots_td[[3]], plots_td[[4]],
+             plots_td[[5]], plots_td[[6]], plots_td[[7]], plots_td[[8]],
+             plots_td[[9]], plots_td[[10]], plots_td[[11]], plots_td[[12]], 
+             plots_td[[13]], ncol = 4)
+
+# name items in list using explanatory variables for later indexing
+names(plots_td) <- explanatory
+
+# for presence in a year (presence in low_impact_seismic, road paved undiv 2, road unimproved, trail, gravel 1l/2l, conventional seismic - kinda funky graphs)
+plots_yp <- list()
+for (ii in 1:length(explanatory)) {
+  plots_yp[[ii]] <- ggplot(coy_1k, aes_string(x = explanatory[ii], y = "ccountp")) +
+    geom_point()
+}
+grid.arrange(plots_yp[[1]], plots_yp[[2]], plots_yp[[3]], plots_yp[[4]],
+             plots_yp[[5]], plots_yp[[6]], plots_yp[[7]], plots_yp[[8]],
+             plots_yp[[9]], plots_yp[[10]], plots_yp[[11]], plots_yp[[12]],
+             plots_yp[[13]], ncol = 4)
+
+
+# name graphs in list using explanatory variables for later indexing
+names(plots_yp) <- explanatory
+
+# for proportional presence (trail, road gravel 1l, conventional seismic, pipeline, transmission line, road unimproved closest to linear relationships)
+plots_pp <- list()
+for (ii in 1:length(explanatory)) {
+  plots_pp[[ii]] <- ggplot(coy_1k, aes_string(x = explanatory[ii], y = "c_prop_pres")) + geom_point()
+}
+grid.arrange(plots_pp[[1]], plots_pp[[2]], plots_pp[[3]], plots_pp[[4]],
+             plots_pp[[5]], plots_pp[[6]], plots_pp[[7]], plots_pp[[8]],
+             plots_pp[[9]], plots_pp[[10]], plots_pp[[11]], plots_pp[[12]], 
+             plots_pp[[13]], ncol = 4)
+
+# name items in list using explanatory variables  for later indexing
+names(plots_pp) <- explanatory
+```
+# lm testing (one a time to see individual stats, unfinished)
+```{r}
+trailmodel <- lm(coy_1k$c_prop_pres ~ coy_1k$trail)
+summary(trailmodel)
+
+trailmodela <- lm(coy_1k$tot_det ~ coy_1k$trail)
+summary(trailmodela)
+
+trailmodelb <- lm(coy_1k$ccountp ~ coy_1k$trail)
+summary(trailmodelb)
+
+convseismodel <- lm(coy_1k$c_prop_pres ~ coy_1k$conventional_seismic)
+summary(convseismodel)
+
+pipemodel <- lm(coy_1k$c_prop_pres ~ coy_1k$pipeline)
+summary(pipemodel)
+
+tranlinemodel <- lm(coy_1k$c_prop_pres ~ coy_1k$transmission_line)
+summary(tranlinemodel)
+
+```
+
+
+# buffer distance testing (tbc)
+```{r}
+buff <- c(250, 500,  750, 1000, 1250, 1500, 1750, 2000, 2250, 2500, 2750, 3000, 3250, 3500, 3750, 4000, 4250, 4500, 4750, 5000)
+```
+
+
+
+# GLM general
+```{r}
+# proportional presence glm (truck trail high p-value, omit this moving forard)
+coy_global <- glm(cbind(coy_1k$coy1, coy_1k$coy0) ~ 1 +
+                  trail +
+                    conventional_seismic +
+                    pipeline + clearing_unknown + road_unimproved + road_gravel_1l + road_gravel_2l +
+                    truck_trail + road_paved_undiv_2l + road_unclassified + low_impact_seismic +
+                    road_paved_1l + road_paved_undiv_1l, 
+                  data = coy_1k, 
+                  family = binomial)
+
+summary(coy_global)
+```
+
+# Hypothesis testing
+```{r}
+# using binomial family and monthly proportion presence/absence
+prop_vec <- cbind(coy_1k$coy1, coy_1k$coy0)
+
+#H0: Null (coyotes ~ ) (aic 979.27)
+h0 <- glm(prop_vec ~ 1,
+          data = coy_1k, 
+          family = binomial)
+
+summary(h0)
+
+#H1: Coyotes like wide features (coyote ~ road + highway + pipeline) 
+# aic 706.11 (using most variables- best model)
+h1a <- glm(prop_vec ~ pipeline + # neg impact
+            road_unimproved + # high impact
+            road_gravel_1l + # high impact
+            road_gravel_2l + 
+            #truck_trail + omit for pvalue
+            road_paved_undiv_2l + # high impact
+            # road_unclassified  + omit for pvalue
+            # road_paved_1l + omit for nas
+            road_paved_undiv_1l  # high impact
+          ,data = coy_1k, 
+          family = binomial)
+summary(h1a)
+
+# aic 736.85
+h1 <- glm(prop_vec ~ road_gravel_1l +
+            road_paved_undiv_2l +
+            pipeline,
+          data = coy_1k, 
+          family = binomial)
+
+summary(h1)
+
+# same features as H2 aic 736.85
+h1b <- glm(prop_vec ~ road_gravel_1l +
+            road_paved_undiv_2l +
+            pipeline,
+          data = coy_1k, 
+          family = binomial)
+
+summary(h1b)
+
+
+#H2: Coyote use of wide features depends on presence of competitors (coyote ~ roads + highway + pipeline + roads:wolf + highway:wolf + pipeline:wolf)
+#presence of wolf (aic 736.49, almost the same as without wolf)
+h2 <- glm(prop_vec ~ road_gravel_1l +
+            road_paved_undiv_2l +
+            pipeline +
+            road_gravel_1l:wolf +
+            road_paved_undiv_2l:wolf +
+            pipeline:wolf,
+          data = coy_1k, 
+          family = binomial)
+
+summary(h2)
+
+# presence of fox (slightly stronger model based on aic score 719.71)
+h2a <- glm(prop_vec ~ road_gravel_1l +
+            road_paved_undiv_2l +
+            pipeline +
+            road_gravel_1l:fox +
+            road_paved_undiv_2l:fox +
+            pipeline:fox,
+          data = coy_1k, 
+          family = binomial)
+
+summary(h2a)
+
+#H3: Coyote use of wide features also varies with presence of prey (coyote ~ H2 + hares + deer + moose)
+
+# presence of hare and deer (aic score 695.68 indicates strongest model)
+h3 <- glm(prop_vec ~ road_gravel_1l +
+            road_paved_undiv_2l +
+            pipeline +
+            road_gravel_1l:hare +
+            road_paved_undiv_2l:hare +
+            pipeline:hare +
+            road_gravel_1l:deer +
+            road_paved_undiv_2l:deer +
+            pipeline:deer,
+          data = coy_1k, 
+          family = binomial)
+
+summary(h3)
+
+# presence of hare and moose (aic 713.5, still better than wolf/no interaction)
+h3a <- glm(prop_vec ~ road_gravel_1l +
+            road_paved_undiv_2l +
+            pipeline +
+            road_gravel_1l:hare +
+            road_paved_undiv_2l:hare +
+            pipeline:hare +
+            road_gravel_1l:moose +
+            road_paved_undiv_2l:moose +
+            pipeline:moose,
+          data = coy_1k, 
+          family = binomial)
+
+summary(h3a)
+
+# presence of hare only (aic 724.01, better than wolf worse than fox)
+h3b <- glm(prop_vec ~ road_gravel_1l +
+            road_paved_undiv_2l +
+            pipeline +
+            road_gravel_1l:hare +
+            road_paved_undiv_2l:hare +
+            pipeline:hare ,
+          data = coy_1k, 
+          family = binomial)
+
+summary(h3b)
+
+
+#H4: Coyotes like narrow features (coyotes ~ trails + seismic lines +3D SLS)
+# aic 917.58 (best model)
+h4a <- glm(prop_vec ~ trail +
+            transmission_line +
+            conventional_seismic,
+          data = coy_1k, 
+          family = binomial)
+
+summary(h4a) 
+
+# most variables (aic 919.57)
+h4c <- glm(prop_vec ~ trail +
+            transmission_line +
+            conventional_seismic + 
+            low_impact_seismic # .9 pvalue
+           ,
+          data = coy_1k, 
+          family = binomial)
+
+summary(h4c)
+
+# aic score 923.41
+h4 <- glm(prop_vec ~ trail +
+            low_impact_seismic +
+            conventional_seismic,
+          data = coy_1k, 
+          family = binomial)
+
+summary(h4)
+
+
+
+# aic 959.73
+h4b <- glm(prop_vec ~ trail +
+            transmission_line +
+            low_impact_seismic,
+          data = coy_1k, 
+          family = binomial)
+
+summary(h4b)
+
+#H5: Coyote use of narrow features depends on presence of competitors (coyote ~ H4 + trails:wolf, seismic lines:wolf, 3D SLS:wolf)
+# aic 922.38 (very close to without)
+h5 <- glm(prop_vec ~ trail +
+            transmission_line +
+            conventional_seismic +
+            trail:wolf +
+            transmission_line:wolf +
+            conventional_seismic:wolf,
+          data = coy_1k, 
+          family = binomial)
+
+summary(h5)
+
+# aic 903.86 (much better interaction variable)
+h5a <- glm(prop_vec ~ trail +
+            transmission_line +
+            conventional_seismic +
+            trail:fox +
+            transmission_line:fox +
+            conventional_seismic:fox,
+          data = coy_1k, 
+          family = binomial)
+
+summary(h5a)
+
+#H6: Coyote use of narrow features also varies with presence of prey (coyotes ~ H4 + hares + deer + moose)
+# hare and deer interaction (aic 799.62)
+h6 <- glm(prop_vec ~ trail +
+            transmission_line +
+            conventional_seismic +
+            trail:hare +
+            transmission_line:hare +
+            conventional_seismic:hare +
+            trail:deer +
+            transmission_line:deer +
+            conventional_seismic:deer,
+          data = coy_1k, 
+          family = binomial)
+
+summary(h6)
+
+# aic 856.64 moose and hare
+h6a <- glm(prop_vec ~ trail +
+            transmission_line +
+            conventional_seismic +
+            trail:hare +
+            transmission_line:hare +
+            conventional_seismic:hare +
+            trail:moose +
+            transmission_line:moose +
+            conventional_seismic:moose,
+          data = coy_1k, 
+          family = binomial)
+
+summary(h6a)
+
+#H7: Coyotes like both wide and narrow features (coyote ~ roads + highway + pipeline + trails + seismic lines + 3D SLS)
+# aic 715.66 (2nd best model)
+h7 <- glm(prop_vec ~ road_gravel_1l +
+            road_paved_undiv_2l +
+            pipeline +
+            trail +
+            transmission_line +
+            conventional_seismic,
+          data = coy_1k, 
+          family = binomial)
+
+summary(h7)
+
+#H8: “baseline” aka all natural features (coyote ~ select the relevant natural features, should be 6-7)
+# (aic 728.52, 3rd best model) using all lc class variables (in order: water, exposed land, developed land, shrubland, grassland, agriculture, coniferous forest, broadleaf forest, mixed forest)
+h8 <- glm(prop_vec ~ lc_class20 +
+            lc_class33 +
+            lc_class34 +
+            lc_class50 +
+            lc_class110 +
+            lc_class120 +
+            lc_class210 +
+            lc_class220 +
+            lc_class230,
+          data = coy_1k, 
+          family = binomial)
+
+summary(h8)
+
+# taking out developed land (slightly weaker than above aic = 732.84), taking out developed land and agriculture (weaker model, aic = 937.31)
+h8a <- glm(prop_vec ~ lc_class20 +
+            lc_class33 + # high std. error (?)
+            #lc_class34 +
+            lc_class50 +
+            lc_class110 +
+            #lc_class120 +
+            lc_class210 +
+            lc_class220 +
+            lc_class230,
+          data = coy_1k, 
+          family = binomial)
+
+summary(h8a)
+
+
+
+```
+
+# bundle together, treat LU's as categories/fixed effect (set one as reference condition), or random (prob not this one) - R book (zure)
