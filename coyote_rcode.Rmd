@@ -206,6 +206,149 @@ summary(tranlinemodel)
 # buffer distance testing (tbc)
 ```{r}
 buff <- c(250, 500,  750, 1000, 1250, 1500, 1750, 2000, 2250, 2500, 2750, 3000, 3250, 3500, 3750, 4000, 4250, 4500, 4750, 5000)
+
+
+
+# 250 counts
+coy250 <- coy_full_ed %>% filter(buff_dist == 250)
+
+plots <- list()
+for (ii in 1:length(explanatory)) {
+  plots[[ii]] <- ggplot(coy250, aes_string(x = explanatory[ii])) +
+    geom_histogram()
+}
+grid.arrange(plots[[1]], plots[[2]], plots[[3]], plots[[4]],
+             plots[[5]], plots[[6]], plots[[7]], plots[[8]],
+             plots[[9]], plots[[10]], plots[[11]], plots[[12]],
+             plots[[13]], ncol = 4)
+
+# 500 counts
+coy500 <- coy_full_ed %>% filter(buff_dist == 500)
+
+plots <- list()
+for (ii in 1:length(explanatory)) {
+  plots[[ii]] <- ggplot(coy500, aes_string(x = explanatory[ii])) +
+    geom_histogram()
+}
+grid.arrange(plots[[1]], plots[[2]], plots[[3]], plots[[4]],
+             plots[[5]], plots[[6]], plots[[7]], plots[[8]],
+             plots[[9]], plots[[10]], plots[[11]], plots[[12]],
+             plots[[13]], ncol = 4)
+
+# 750 counts
+coy750 <- coy_full_ed %>% filter(buff_dist == 750)
+
+plots <- list()
+for (ii in 1:length(explanatory)) {
+  plots[[ii]] <- ggplot(coy750, aes_string(x = explanatory[ii])) +
+    geom_histogram()
+}
+grid.arrange(plots[[1]], plots[[2]], plots[[3]], plots[[4]],
+             plots[[5]], plots[[6]], plots[[7]], plots[[8]],
+             plots[[9]], plots[[10]], plots[[11]], plots[[12]],
+             plots[[13]], ncol = 4)
+
+# 1k counts
+plots <- list()
+for (ii in 1:length(explanatory)) {
+  plots[[ii]] <- ggplot(coy_1k, aes_string(x = explanatory[ii])) +
+    geom_histogram()
+}
+grid.arrange(plots[[1]], plots[[2]], plots[[3]], plots[[4]],
+             plots[[5]], plots[[6]], plots[[7]], plots[[8]],
+             plots[[9]], plots[[10]], plots[[11]], plots[[12]],
+             plots[[13]], ncol = 4)
+
+# 1250 counts
+coy1250 <- coy_full_ed %>% filter(buff_dist == 1250)
+
+plots <- list()
+for (ii in 1:length(explanatory)) {
+  plots[[ii]] <- ggplot(coy1250, aes_string(x = explanatory[ii])) +
+    geom_histogram()
+}
+grid.arrange(plots[[1]], plots[[2]], plots[[3]], plots[[4]],
+             plots[[5]], plots[[6]], plots[[7]], plots[[8]],
+             plots[[9]], plots[[10]], plots[[11]], plots[[12]],
+             plots[[13]], ncol = 4)
+
+# 1500 counts :(
+coy1500 <- coy_full_ed %>% filter(buff_dist == 1500)
+
+plots <- list()
+for (ii in 1:length(explanatory)) {
+  plots[[ii]] <- ggplot(coy1500, aes_string(x = explanatory[ii])) +
+    geom_histogram()
+}
+grid.arrange(plots[[1]], plots[[2]], plots[[3]], plots[[4]],
+             plots[[5]], plots[[6]], plots[[7]], plots[[8]],
+             plots[[9]], plots[[10]], plots[[11]], plots[[12]],
+             plots[[13]], ncol = 4)
+
+# 1750 counts
+coy1750 <- coy_full_ed %>% filter(buff_dist == 1750)
+
+plots <- list()
+for (ii in 1:length(explanatory)) {
+  plots[[ii]] <- ggplot(coy1750, aes_string(x = explanatory[ii])) +
+    geom_histogram()
+}
+grid.arrange(plots[[1]], plots[[2]], plots[[3]], plots[[4]],
+             plots[[5]], plots[[6]], plots[[7]], plots[[8]],
+             plots[[9]], plots[[10]], plots[[11]], plots[[12]],
+             plots[[13]], ncol = 4)
+
+# 2000 counts
+coy2000 <- coy_full_ed %>% filter(buff_dist == 2000)
+
+plots <- list()
+for (ii in 1:length(explanatory)) {
+  plots[[ii]] <- ggplot(coy2000, aes_string(x = explanatory[ii])) +
+    geom_histogram()
+}
+grid.arrange(plots[[1]], plots[[2]], plots[[3]], plots[[4]],
+             plots[[5]], plots[[6]], plots[[7]], plots[[8]],
+             plots[[9]], plots[[10]], plots[[11]], plots[[12]],
+             plots[[13]], ncol = 4)
+
+# 3000 counts
+coy3000 <- coy_full_ed %>% filter(buff_dist == 3000)
+
+plots <- list()
+for (ii in 1:length(explanatory)) {
+  plots[[ii]] <- ggplot(coy3000, aes_string(x = explanatory[ii])) +
+    geom_histogram()
+}
+grid.arrange(plots[[1]], plots[[2]], plots[[3]], plots[[4]],
+             plots[[5]], plots[[6]], plots[[7]], plots[[8]],
+             plots[[9]], plots[[10]], plots[[11]], plots[[12]],
+             plots[[13]], ncol = 4)
+
+# 4000 counts
+coy4000 <- coy_full_ed %>% filter(buff_dist == 2000)
+
+plots <- list()
+for (ii in 1:length(explanatory)) {
+  plots[[ii]] <- ggplot(coy4000, aes_string(x = explanatory[ii])) +
+    geom_histogram()
+}
+grid.arrange(plots[[1]], plots[[2]], plots[[3]], plots[[4]],
+             plots[[5]], plots[[6]], plots[[7]], plots[[8]],
+             plots[[9]], plots[[10]], plots[[11]], plots[[12]],
+             plots[[13]], ncol = 4)
+
+# 5000 counts
+coy5000 <- coy_full_ed %>% filter(buff_dist == 5000)
+
+plots <- list()
+for (ii in 1:length(explanatory)) {
+  plots[[ii]] <- ggplot(coy5000, aes_string(x = explanatory[ii])) +
+    geom_histogram()
+}
+grid.arrange(plots[[1]], plots[[2]], plots[[3]], plots[[4]],
+             plots[[5]], plots[[6]], plots[[7]], plots[[8]],
+             plots[[9]], plots[[10]], plots[[11]], plots[[12]],
+             plots[[13]], ncol = 4)
 ```
 
 
