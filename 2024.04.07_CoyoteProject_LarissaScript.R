@@ -759,7 +759,9 @@ project_data %>%
 summary()
 ### Max is 15 months for all, seems like some were quite a bit less. Filtering for minimum 12 months operational. 
 
-### Filter data for cameras operational at least 12 months (based on proportional detection data)
+
+# Final addition to project_data dataframe --------------------------------
+#Filter data for cameras operational at least 12 months (based on proportional detection data)
 project_data <- project_data %>% 
   filter(coy_tot_month > 11) %>%  # Result is removing 7 rows of camera observations 
 ### Filter data for covariates of interest
