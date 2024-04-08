@@ -100,6 +100,17 @@ mutate(
   # Further down the line you are going to appreciate removing rows with NA value
   na.omit() 
 
+# Threshold for months cameras operational? 
+### How many months operational are all cameras?
+project_data %>% 
+  dplyr::select(coy_tot_month, moose_tot_month, hare_tot_month, deer_tot_month, wolf_tot_month) %>% 
+  summary()
+### Max is 15 months for all, seems like some were quite a bit less. Filtering for minimum 12 months operational. 
+
+# Filter out cameras operational less than 12 months
+project_data <- project_data %>% 
+  filter(coy_tot_month > 11) 
+
 # Visualizing wide features  -------------------------
 # First graph: feature vs. coyote detections across the whole site
 # Second graph: percent cover of the variable at each camera, separated by array
@@ -524,6 +535,7 @@ figure_12 <- ggarrange(plot_94,
 # First graph: feature vs. coyote detections across the whole site
 # Second graph: percent cover of the variable at each camera, separated by array
 # Third graph: percent cover of the variable at each camera, considered over the whole study area 
+
 # Moose
 plot_33 <- project_data %>% 
   ggplot(mapping = aes(x = moose_tot_det, y = coy_tot_det, color = array)) +
@@ -715,15 +727,14 @@ figure_13 <- ggarrange(plot_102,
 
 # 3. Confirm which variables are relevant for modelling ------------------
 
+# 3a. Initial thoughts ------------------------------------------------
 # Keeping all natural features: shrub, water, mixed_forest, conifer, broadleaf, grass
+# Animals: competitor is grey_wolf; prey is moose, white-tailed_deer, and snowshoe_hare
+# Linear features: Checking with histograms below whether the potential linear features have enough presence to be relevant. There shouldn't just be a large tail of only one value (usually 0's).
 
-# Animals: competitor is grey_wolf, prey is moose, white-tailed_deer, and snoeshoe_hare
-
-# Linear features: Check with histograms whether the potential linear features have enough presence to be relevant. There shouldn't just be a large tail of only one value (usually 0's).
-
+# 3b. View histograms (notes on the side) ---------------------------------
 ## Covariates should already be filtered to only buffer of 1000m at this point, if not your histograms will have a crazy amount of extra zeros!
 
-## View histograms (notes on the side)
 hist_1 <- hist(covariates$pipeline) # in
 hist_2 <- hist(covariates$truck_trail) # out
 hist_3 <- hist(covariates$vegetated_edge_roads) # in
@@ -746,70 +757,76 @@ hist_19 <- hist(covariates$road_unpaved_1l) # out
 hist_20 <- hist(covariates$road_paved_5l) # out
 hist_21 <- hist(covariates$road_paved_4l) # out
 
-# Variables moving on to the next step: pipeline, vegetated_edge_roads (kicked out because we don't know which roads this is on the side of and we are only using some roads), conventional_seismic, road_gravel_1l, trail, low_impact_seismic (kicked out because there is a warning in the metadata HFI pdf about the challenge of capturing this feature), transmission_line (kicked out because of high correlation in previous correlation chart), road unimproved
+# Variables moving on to the next step: pipeline, conventional_seismic, road_gravel_1l, trail, low_impact_seismic, transmission_line, road unimproved. Gegetated_edge_roads kicked out because we don't know which roads this is on the side of and we are only using some roads.
 
-### Wide: pipeline, merging road_gravel_1l and road_gravel_2l into gravel
-### Narrow: trail, conventional seismic, road_unimproved
+# 3c. Pre-modelling assumption: Check if there is correlation between variables -------------------------
+chart.Correlation(project_data[c("pipeline", "transmission_line", "road_gravel_1l", "road_gravel_2l", "trail", "conventional_seismic", "low_impact_seismic", "road_unimproved", "wolf_tot_det", "deer_tot_det", "moose_tot_det", "coy_tot_det", "hare_tot_det", "coy_prop_abs", "coy_prop_pres", "water", "shrub", "grass", "conifer", "broadleaf", "mixed_forest")],
+                  histogram = TRUE, 
+                  method = "spearman",
+                  text.scale = 8)
+### r^2 cut off of 0.7 for variables to be used together. 
+# Pipeline and transmission line 0.63, merge later
+# Broadleaf and conifer -0.66, merge later
+# Broadleaf and deer 0.63, not independant variables in a model
 
-# 4. Filter and merge data based on which variables you want to move forward with --------
 
-### How many months operational are all cameras?
-project_data %>% 
-  dplyr::select(coy_tot_month, moose_tot_month, hare_tot_month, deer_tot_month, wolf_tot_month) %>% 
-summary()
-### Max is 15 months for all, seems like some were quite a bit less. Filtering for minimum 12 months operational. 
+# 3d. Dealing with correlated variables and merging for modelling  --------
 
+# Wide: pipeline and transmission line merged into infrastructure_line, merging road_gravel_1l and road_gravel_2l into gravel_road
+# Narrow: trail; conventional seismic and low impact seismic merged into seismic; road_unimproved
+# Natural: by canopy level - forest is merged conifer, broadleaf, and mixed forest; shrub, grass, and water.
 
-# Final addition to project_data dataframe --------------------------------
-#Filter data for cameras operational at least 12 months (based on proportional detection data)
+# 3e. Update potential covariates in project_data dataframe -----------------------------------------
 project_data <- project_data %>% 
-  filter(coy_tot_month > 11) %>%  # Result is removing 7 rows of camera observations 
-### Filter data for covariates of interest
+  ### Filter data for covariates of interest
   dplyr::select(site, array, camera, 
-         # animals
-         coy_prop_abs, coy_prop_pres, coy_tot_month, coy_tot_det, moose_prop_abs, moose_prop_pres, moose_tot_det, moose_tot_month, hare_prop_pres, hare_prop_abs, hare_tot_month, hare_tot_det, deer_prop_pres, deer_tot_month, deer_prop_abs, deer_tot_det, wolf_prop_pres, wolf_prop_abs, wolf_tot_month, wolf_tot_det,
-         # linear features
-         pipeline, road_gravel_1l, road_gravel_2l, trail, conventional_seismic, road_unimproved,
-         # natural features
-         water, shrub, grass, conifer, broadleaf, mixed_forest) %>% 
-  # combine gravel features
+                # animals
+                coy_prop_abs, coy_prop_pres, coy_tot_month, coy_tot_det, moose_prop_abs, moose_prop_pres, moose_tot_det, moose_tot_month, hare_prop_pres, hare_prop_abs, hare_tot_month, hare_tot_det, deer_prop_pres, deer_tot_month, deer_prop_abs, deer_tot_det, wolf_prop_pres, wolf_prop_abs, wolf_tot_month, wolf_tot_det,
+                # linear features
+                pipeline, transmission_line, road_gravel_1l, road_gravel_2l, trail, conventional_seismic, low_impact_seismic, road_unimproved,
+                # natural features
+                water, shrub, grass, conifer, broadleaf, mixed_forest) %>% 
+  # combine some features
   mutate(
-    gravel = road_gravel_2l + road_gravel_1l
+    gravel_road = road_gravel_2l + road_gravel_1l,
+    seismic_line = conventional_seismic + low_impact_seismic,
+    infrastructure_line = transmission_line + pipeline,
+    forest = conifer + broadleaf + mixed_forest,
   ) %>% 
-  # remove old gravel features
-  dplyr::select(-road_gravel_2l, -road_gravel_1l) %>% 
+  # remove old unmerged features
+  dplyr::select(-road_gravel_2l, -road_gravel_1l, -conventional_seismic, -low_impact_seismic, -transmission_line, -pipeline, -conifer, -broadleaf, -mixed_forest) %>% 
   # remove total month from proportional used to figure out number of camera months operational
   dplyr::select(-coy_tot_month, -moose_tot_month, -hare_tot_month, -deer_tot_month, -wolf_tot_month)
 
-### Working with 147 camera observations
+# 3f. Pre-modelling assumption: Check if correlation between merged variables -----------------------
+chart.Correlation(project_data[c("infrastructure_line", "gravel_road", "trail", "seismic_line", "road_unimproved", "wolf_tot_det", "deer_tot_det", "moose_tot_det", "coy_tot_det", "hare_tot_det", "coy_prop_abs", "coy_prop_pres", "water", "grass", "forest", "shrub")],
+                  histogram = TRUE, 
+                  method = "spearman",
+                  text.scale = 6)
+### Result: r^2 cut off of 0.7 for variables to be used together. Considering potential variable combinations from the models above
+# infrastructure_line and gravel_road are at 0.59 *** pretty high!
+# shrub and forest -0.55 *** pretty high! when I combine shrub and forest then they are highly correlated with grass. This might just be unavoidable with natural features?
 
 # 5. Proportional binomial model time -------------------------------------
 
 # 5a. Anticipated models ------------------------------------------------------
 # H0: Null, coyotes ~ 
 
-# H1: Coyotes like wide features, coyotes ~ pipeline + gravel
+# H1: Coyotes like wide features, coyotes ~ infrastructure_line + gravel_road
 
-# H2: Coyote use of wide features depends on the presence of wolf competitors, coyote ~ pipeline + gravel + pipeline:wolf_tot_det + gravel:wolf_tot_det
+# H2: Coyote use of wide features depends on the presence of wolf competitors, coyote ~ infrastructure_line + gravel_road + infrastructure_line:wolf_tot_det + gravel_road:wolf_tot_det
 
-# H3: Coyote use of wide features varies with the presence of prey, coyote ~ pipeline + gravel + deer_tot_det + hare_tot_det + moose_tot_det
+# H3: Coyote use of wide features varies with the presence of prey, coyote ~ infrastructure_line + gravel_road + deer_tot_det + hare_tot_det + moose_tot_det
 
-# H4: Coyotes like narrow features, coyote ~ trail + conventional_seismic + road_unimproved
+# H4: Coyotes like narrow features, coyote ~ trail + seismic_line + road_unimproved
 
-# H5: Coyote use of narrow features depends on presence of a competitor, coyote ~ trail + conventional_seismic  + road_unimproved + trail:wolf_tot_det + conventional_seismic:wolf_tot_det + road_unimproved:wolf_tot_det
+# H5: Coyote use of narrow features depends on presence of a competitor, coyote ~ trail + seismic_line  + road_unimproved + trail:wolf_tot_det + seismic_line:wolf_tot_det + road_unimproved:wolf_tot_det
 
-# H6: Coyote use of narrow features also varies with the presence of prey, coyotes ~ trail + conventional_seismic + road_unimproved + deer_tot_det + hare_tot_det + moose_tot_det
+# H6: Coyote use of narrow features also varies with the presence of prey, coyotes ~ trail + seismic_line + road_unimproved + deer_tot_det + hare_tot_det + moose_tot_det
 
-# H7: Coyotes like both wide and narrow features, coyote ~ pipeline + gravel + trail + conventional seismic + road_unimproved
+# H7: Coyotes like both wide and narrow features, coyote ~ infrastructure_line + gravel_road + trail + seismic_line + road_unimproved
 
-# H8: Baseline world without humans, coyotes ~ water + shrub + grass + conifer + broadleaf + mixed_forest
-
-# 5b. Assumption 1: Model variables are independant
-chart.Correlation(project_data[c("pipeline", "gravel", "trail", "conventional_seismic", "road_unimproved", "wolf_tot_det", "deer_tot_det", "moose_tot_det", "coy_tot_det", "hare_tot_det", "coy_prop_abs", "coy_prop_pres", "water", "shrub", "grass", "conifer", "broadleaf", "mixed_forest")],
-                  histogram = TRUE, 
-                  method = "spearman",
-                  text.scale = 6)
-### Result: r^2 cut off of 0.7 for variables to be used together. Considering potential variable combinations from the models above - pipeline and gravel (merged) pretty high at 0.65, broadleaf and conifer at -0.64. Nothing goes over threshold that will be put together. 
+# H8: Baseline world without humans, coyotes ~ water + shrub + grass + forest
 
 
 # 5c. Models --------------------------------------------------------------
@@ -824,37 +841,37 @@ summary(H0)
 #Residual deviance: 654.45  on 146  degrees of freedom
 #AIC: 926.33
 
-# H1: Coyotes like wide features, coyotes ~ pipeline + gravel
+# H1: Coyotes like wide features, coyotes ~ infrastructure_line + gravel_road
 H1 <- glm(
   cbind(coy_prop_abs, coy_prop_pres) ~ 
-    scale(pipeline) + 
-    scale(gravel),
+    scale(infrastructure_line) + 
+    scale(gravel_road),
   data = project_data,
   family = binomial)
 
 summary(H1)
-#Residual deviance: 538.85  on 144  degrees of freedom
-#AIC: 814.72
+#Residual deviance: 541.08  on 144  degrees of freedom
+#AIC: 816.96
 
-# H2: Coyote use of wide features depends on the presence of wolf competitors, coyote ~ pipeline + gravel + pipeline:wolf_tot_det + gravel:wolf_tot_det
+# H2: Coyote use of wide features depends on the presence of wolf competitors, coyote ~ infrastructure_line + gravel_road + infrastructure_line:wolf_tot_det + gravel_road:wolf_tot_det
 H2 <- glm(
   cbind(coy_prop_abs, coy_prop_pres) ~ 
-    scale(pipeline) + 
-    scale(gravel) +
-    scale(pipeline):scale(wolf_tot_det) +
-    scale(gravel):scale(wolf_tot_det),
+    scale(infrastructure_line) + 
+    scale(gravel_road) +
+    scale(infrastructure_line):scale(wolf_tot_det) +
+    scale(gravel_road):scale(wolf_tot_det),
   data = project_data,
   family = binomial)
 
 summary(H2)
-#Residual deviance: 537.99  on 142  degrees of freedom
-#AIC: 817.86
+#Residual deviance: 540.26  on 142  degrees of freedom
+#AIC: 820.13
 
-# H3: Coyote use of wide features varies with the presence of prey, coyote ~ pipeline + gravel + deer_tot_det + hare_tot_det + moose_tot_det
+# H3: Coyote use of wide features varies with the presence of prey, coyote ~ infrastructure_line + gravel_road + deer_tot_det + hare_tot_det + moose_tot_det
 H3 <- glm(
   cbind(coy_prop_abs, coy_prop_pres) ~ 
-    scale(pipeline) + 
-    scale(gravel) +
+    scale(infrastructure_line) + 
+    scale(gravel_road) +
     scale(deer_tot_det) +
     scale(hare_tot_det) +
     scale(moose_tot_det),
@@ -862,43 +879,43 @@ H3 <- glm(
   family = binomial)
 
 summary(H3)
-#Residual deviance: 401.74  on 141  degrees of freedom
-#AIC: 683.61
+#Residual deviance: 401.59  on 141  degrees of freedom
+#AIC: 683.46
 
-# H4: Coyotes like narrow features, coyote ~ trail + conventional_seismic + road_unimproved
+# H4: Coyotes like narrow features, coyote ~ trail + seismic_line + road_unimproved
 H4 <- glm(
   cbind(coy_prop_abs, coy_prop_pres) ~ 
     scale(trail) +
-    scale(conventional_seismic) +
+    scale(seismic_line) +
     scale(road_unimproved),
   data = project_data,
   family = binomial)
 
 summary(H4)
-#Residual deviance: 575.33  on 143  degrees of freedom
-#AIC: 853.2
+#Residual deviance: 604.42 on 143  degrees of freedom
+#AIC: 882.29
 
-# H5: Coyote use of narrow features depends on presence of a competitor, coyote ~ trail + conventional_seismic  + road_unimproved + trail:wolf_tot_det + conventional_seismic:wolf_tot_det + road_unimproved:wolf_tot_det
+# H5: Coyote use of narrow features depends on presence of a competitor, coyote ~ trail + seismic_line  + road_unimproved + trail:wolf_tot_det + seismic_line:wolf_tot_det + road_unimproved:wolf_tot_det
 H5 <- glm(
   cbind(coy_prop_abs, coy_prop_pres) ~ 
     scale(trail) +
-    scale(conventional_seismic) +
+    scale(seismic_line) +
     scale(road_unimproved) +
     scale(trail):scale(wolf_tot_det) +
-    scale(conventional_seismic):scale(wolf_tot_det) +
+    scale(seismic_line):scale(wolf_tot_det) +
     scale(road_unimproved):scale(wolf_tot_det),
   data = project_data,
   family = binomial)
 
 summary(H5)
-#Residual deviance: 573.19  on 140  degrees of freedom
-#AIC: 857.06
+#Residual deviance: 599.09  on 140  degrees of freedom
+#AIC: 882.96
 
-# H6: Coyote use of narrow features also varies with the presence of prey, coyotes ~ trail + conventional_seismic + road_unimproved + deer_tot_det + hare_tot_det + moose_tot_det
+# H6: Coyote use of narrow features also varies with the presence of prey, coyotes ~ trail + seismic_line + road_unimproved + deer_tot_det + hare_tot_det + moose_tot_det
 H6 <- glm(
   cbind(coy_prop_abs, coy_prop_pres) ~ 
     scale(trail) +
-    scale(conventional_seismic) +
+    scale(seismic_line) +
     scale(road_unimproved) +
     scale(deer_tot_det) +
     scale(hare_tot_det) +
@@ -907,39 +924,37 @@ H6 <- glm(
   family = binomial)
 
 summary(H6)
-#Residual deviance: 412.66  on 140  degrees of freedom
-#AIC: 696.53
+#Residual deviance: 424.96  on 140  degrees of freedom
+#AIC: 708.83
 
-# H7: Coyotes like both wide and narrow features, coyote ~ pipeline + gravel + trail + conventional seismic + road_unimproved
+# H7: Coyotes like both wide and narrow features, coyote ~ infrastructure_line + gravel_road + trail + seismic_line + road_unimproved
 H7 <- glm(
   cbind(coy_prop_abs, coy_prop_pres) ~ 
-    scale(pipeline) + 
-    scale(gravel) +
+    scale(infrastructure_line) + 
+    scale(gravel_road) +
     scale(trail) +
-    scale(conventional_seismic) +
+    scale(seismic_line) +
     scale(road_unimproved),
   data = project_data,
   family = binomial)
 
 summary(H7)
-#Residual deviance: 454.67  on 141  degrees of freedom
-#AIC: 736.54
+#Residual deviance: 476.83  on 141  degrees of freedom
+#AIC: 758.7
 
-# H8: Baseline world without humans, coyotes ~ water + shrub + grass + conifer + broadleaf + mixed_forest
+# H8: Baseline world without humans, coyotes ~ water + shrub + grass + forest
 H8 <- glm(
   cbind(coy_prop_abs, coy_prop_pres) ~ 
     scale(water) +
     scale(shrub) +
     scale(grass) +
-    scale(conifer) +
-    scale(broadleaf) +
-    scale(mixed_forest),
+    scale(forest),
   data = project_data,
   family = binomial)
 
 summary(H8)  
-#Residual deviance: 404.98  on 140  degrees of freedom
-#AIC: 688.85
+#Residual deviance: 417.55 on 142 degrees of freedom
+#AIC: 697.42
 
 # 5d. Post-model assumption testing ----------------------------------------
 
@@ -949,6 +964,9 @@ summary(H8)
 # Dispersion --------------------------------------------------------------
 # Proportional binomial model doesn't care about this
 
+# Pseudo r^2 for the normality of residuals --------------------------------------------------------------
+# *** to be done ***
+
 # 5e. Interpreting model output -------------------------------------------
 ### **** ##### ****** Plotting odds ratios (would be good to see if any variables with large standard error that should be tossed from modelling), graphing predictions ##### **** #### ***** 
 # *** Graphing crew! 
@@ -956,9 +974,9 @@ summary(H8)
 # 6. Model Selection ------------------------------------------------------
 model_selection <- model.sel(H0, H1, H2, H3, H4, H5, H6, H7, H8) 
 
+model_selection
+
 # 7. Plot models -----------------------------------------------------------
 ### **** ##### ****** Plot function (only care about one, is it residuals vs fitted?), cant do AUC, Marissa was looking into pseudo R^2 - ask? ##### **** #### ***** 
 # *** Graphing crew! 
-
-
 
