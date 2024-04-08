@@ -809,6 +809,8 @@ chart.Correlation(project_data[c("infrastructure_line", "gravel_road", "trail", 
 # infrastructure_line and gravel_road are at 0.59 *** pretty high!
 # shrub and forest -0.55 *** pretty high! when I combine shrub and forest then they are highly correlated with grass. This might just be unavoidable with natural features?
 
+## Decided to keep these even though they are high, they are below the threshold so we can keep the covariates and use this in interpreting our results!
+
 # 4. Proportional binomial model time -------------------------------------
 
 # 4a. Anticipated models ------------------------------------------------------
