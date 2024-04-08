@@ -1,7 +1,7 @@
 # ES582 - Coyote GLM
 # Jamie Clarke
 
-# last updated Apr 7
+# last updated Apr 8
 
 library(cowplot)
 library(tidyverse)
@@ -68,9 +68,13 @@ lf_covs <- read.csv('data/OSM_2022_covariates.csv') %>%
          mixed_forest = lc_class230,
          conifer = lc_class210) %>% 
   
-  mutate(gravel_roads = road_gravel_1l + road_gravel_2l) %>% 
+  mutate(gravel_road = road_gravel_1l + road_gravel_2l) %>% 
   
-  mutate(seismic_lines = conventional_seismic + low_impact_seismic) %>% 
+  mutate(seismic_line = conventional_seismic + low_impact_seismic) %>% 
+  
+  mutate(infrastructure_line = transmission_line + pipeline) %>% 
+  
+  mutate(forest = conifer + broadleaf + mixed_forest) %>% 
   
   na.omit()
 
@@ -114,7 +118,7 @@ coyote_data <- coyote_det %>%
 
 coyote_cor <- coyote_data %>%
   
-  select(trail, seismic_lines, pipeline, transmission_line, road_unimproved, gravel_roads, snowshoe_hare, unknown_deer, white_tailed_deer, grey_wolf, moose, water, shrub, grass, broadleaf, conifer, mixed_forest)
+  select(trail, seismic_line, infrastructure_line, road_unimproved, gravel_road, snowshoe_hare, unknown_deer, white_tailed_deer, grey_wolf, moose, water, shrub, grass, forest)
 
 summary(coyote_cor)
 
@@ -147,26 +151,26 @@ H0 <- glm(
 # coyotes like wide features
 H1 <- glm(
           cbind(coyote, absent_coyote) ~
-            scale(transmission_line) +
-            scale(gravel_roads),
+            scale(infrastructure_line) +
+            scale(gravel_road),
           data = coyote_data,
           family = binomial)
 
 # coyote use of wide features depends on presence of competitors
 H2 <- glm(
   cbind(coyote, absent_coyote) ~
-    scale(transmission_line) +
-    scale(gravel_roads) +
-    scale(transmission_line):scale(grey_wolf) +
-    scale(gravel_roads):scale(grey_wolf),
+    scale(infrastructure_line) +
+    scale(gravel_road) +
+    scale(infrastructure_line):scale(grey_wolf) +
+    scale(gravel_road):scale(grey_wolf),
   data = coyote_data,
   family = binomial)
 
 # coyotes use of wide features also varies with presence of prey
 H3 <- glm(
   cbind(coyote, absent_coyote) ~
-    scale(transmission_line) +
-    scale(gravel_roads) +
+    scale(infrastructure_line) +
+    scale(gravel_road) +
     scale(snowshoe_hare) +
     scale(white_tailed_deer) +
     scale(moose),
@@ -177,7 +181,7 @@ H3 <- glm(
 H4 <- glm(
   cbind(coyote, absent_coyote) ~
     scale(trail) +
-    scale(seismic_lines) +
+    scale(seismic_line) +
     scale(road_unimproved),
   data = coyote_data,
   family = binomial)
@@ -186,10 +190,10 @@ H4 <- glm(
 H5 <- glm(
   cbind(coyote, absent_coyote) ~
     scale(trail) +
-    scale(seismic_lines) +
+    scale(seismic_line) +
     scale(road_unimproved) +
     scale(trail):scale(grey_wolf) +
-    scale(seismic_lines):scale(grey_wolf) +
+    scale(seismic_line):scale(grey_wolf) +
     scale(road_unimproved):scale(grey_wolf),
   data = coyote_data,
   family = binomial)
@@ -198,7 +202,7 @@ H5 <- glm(
 H6 <- glm(
   cbind(coyote, absent_coyote) ~
     scale(trail) +
-    scale(seismic_lines) +
+    scale(seismic_line) +
     scale(road_unimproved) +
     scale(snowshoe_hare) +
     scale(white_tailed_deer) +
@@ -210,9 +214,9 @@ H6 <- glm(
 H7 <- glm(
   cbind(coyote, absent_coyote) ~
     scale(transmission_line) +
-    scale(gravel_roads) +
+    scale(gravel_road) +
     scale(trail) +
-    scale(seismic_lines) +
+    scale(seismic_line) +
     scale(road_unimproved),
   data = coyote_data,
   family = binomial)
@@ -223,9 +227,7 @@ H8 <- glm(
     scale(water) +
     scale(shrub) +
     scale(grass) +
-    scale(conifer) +
-    scale(broadleaf) +
-    scale(mixed_forest),
+    scale(forest),
   data = coyote_data,
   family = binomial)
 
@@ -297,148 +299,3 @@ plot_1 <- ggplot(data = H3_odds,aes(x = term, y = estimate)) +
         axis.title.y = element_blank())
 
 plot_1 # shows that gravel roads have negative effect, moose + snowshoe hare detections and transmission lines have positive effect on coyote occurrence; white-tailed deer detections have a smaller impact (cross over 1 line)
-
-# odds ratio for H8
-H8_odds <- tidy(H8,
-                exponentiate = TRUE,
-                confint.int = TRUE) %>% 
-  
-  # bind estimates + confidence intervals from model
-  cbind(exp(confint(H8))) %>% 
-  
-  # change format to a tibble so works nicely with ggplot
-  as_tibble() %>% 
-  
-  rename(lower = '2.5 %',
-         upper = '97.5 %') %>% 
-  
-  filter(term != '(Intercept)')
-
-# plot odds ratios for H8
-plot_2 <- ggplot(data = H8_odds,aes(x = term, y = estimate)) +
-  
-  # add points for odds
-  geom_point() +
-  
-  # add error bars = confidence intervals
-  geom_errorbar(aes(ymin = lower,
-                    ymax = upper),
-                linewidth = 0.5,
-                width = 0.4) +
-  
-  geom_hline(yintercept = 1,
-             alpha = 0.5) +
-  
-  # rename the x axis labels
-  scale_x_discrete(labels = c('wataer',
-                              'shrubs',
-                              'grass',
-                              'coniferous forest',
-                              'broadleaf forest',
-                              'mixed forest')) +
-  
-  # axis titles
-  ylab('odds ratio') +
-  
-  # flip x and y axis 
-  coord_flip() +
-  
-  # specify theme
-  theme_bw() +
-  
-  # specify theme elements
-  theme(panel.grid = element_blank(),
-        axis.title.y = element_blank())
-
-plot_2 # what the heck?? this seems wrong - coyote occurence negatively influenced by all natural features...??
-
-# DOES IT MAKE MORE SENSE TO LUMP FOREST TYPES TOGETHER, GIVEN BROADLEAF + CONIFER ARE AUTOCORRELATED?
-
-
-# TEST GROUPING TREE TYPES ---------------------------------------------------
-
-group_trees <- coyote_data %>% 
-  
-  mutate(forest = conifer + broadleaf + mixed_forest)
-
-# check for autocorrelation
-coyote_trees_cor <- group_trees %>%
-  
-  select(trail, seismic_lines, transmission_line, road_unimproved, gravel_roads, snowshoe_hare, white_tailed_deer, grey_wolf, moose, water, shrub, grass, forest)
-
-chart.Correlation(coyote_trees_cor,
-                  histogram = TRUE,
-                  method = 'pearson')
-
-chart.Correlation(coyote_trees_cor,
-                  histogram = TRUE,
-                  method = 'spearman')
-
-# SUMMARY: seems better, shrubs + forest now autocorrelated for Pearson (0.64) but not for Spearman (0.59)...
-
-# try running GLM for H8 again
-H8_trees <- glm(
-  cbind(coyote, absent_coyote) ~
-    scale(water) +
-    scale(shrub) +
-    scale(grass) +
-    scale(forest),
-  data = group_trees,
-  family = binomial)
-
-# updated model selection
-model.sel(H0, H1, H2, H3, H4, H5, H6, H7, H8_trees) # H8 still comes out as second-best model
-
-# odds ratio for H8_trees
-H8_trees_odds <- tidy(H8_trees,
-                exponentiate = TRUE,
-                confint.int = TRUE) %>% 
-  
-  # bind estimates + confidence intervals from model
-  cbind(exp(confint(H8_trees))) %>% 
-  
-  # change format to a tibble so works nicely with ggplot
-  as_tibble() %>% 
-  
-  rename(lower = '2.5 %',
-         upper = '97.5 %') %>% 
-  
-  filter(term != '(Intercept)')
-
-# plot odds ratios for H8
-plot_3 <- ggplot(data = H8_trees_odds,aes(x = term, y = estimate)) +
-  
-  # add points for odds
-  geom_point() +
-  
-  # add error bars = confidence intervals
-  geom_errorbar(aes(ymin = lower,
-                    ymax = upper),
-                linewidth = 0.5,
-                width = 0.4) +
-  
-  geom_hline(yintercept = 1,
-             alpha = 0.5) +
-  
-  # rename the x axis labels
-  scale_x_discrete(labels = c('wataer',
-                              'shrubs',
-                              'grass',
-                              'coniferous forest',
-                              'broadleaf forest',
-                              'mixed forest')) +
-  
-  # axis titles
-  ylab('odds ratio') +
-  
-  # flip x and y axis 
-  coord_flip() +
-  
-  # specify theme
-  theme_bw() +
-  
-  # specify theme elements
-  theme(panel.grid = element_blank(),
-        axis.title.y = element_blank())
-
-plot_3 # still fucked...
