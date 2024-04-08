@@ -968,7 +968,8 @@ summary(H8)
 # Proportional binomial model doesn't care about this
 
 # 5c. Pseudo r^2 for the normality of residuals --------------------------------------------------------------
-# 1 - (Residual Deviance/Null Deviance)
+
+# Equation: 1 - (Residual Deviance/Null Deviance)
 
 #H0
 summary(H0)
