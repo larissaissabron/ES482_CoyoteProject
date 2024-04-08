@@ -39,7 +39,8 @@ total_detections <- read_csv("/Users/larissabron/Documents/BSc/23_24/Spring/Bore
 ## Now inset the distribution of each feature by array - second plot per covariate.
 ### Additional inset of distribution of each feature looking at the landscape - third plot per covariate. 
 
-# first, get together everything potentially of interest into one file 
+
+# 2a. first, get together everything potentially of interest into one file  --------
 project_data <- covariates %>% 
   # filter for buffer distance of 1000m only
   filter(buff_dist == 1000) %>% 
@@ -100,18 +101,20 @@ mutate(
   # Further down the line you are going to appreciate removing rows with NA value
   na.omit() 
 
-# Threshold for months cameras operational? 
+
+# 2b. Threshold for months cameras operational? ---------------------------
 ### How many months operational are all cameras?
 project_data %>% 
   dplyr::select(coy_tot_month, moose_tot_month, hare_tot_month, deer_tot_month, wolf_tot_month) %>% 
   summary()
 ### Max is 15 months for all, seems like some were quite a bit less. Filtering for minimum 12 months operational. 
 
-# Filter out cameras operational less than 12 months
+
+# 2c. Filter out cameras operational less than 12 months ------------------
 project_data <- project_data %>% 
   filter(coy_tot_month > 11) 
 
-# Visualizing wide features  -------------------------
+# 2d. Visualizing wide features  -------------------------
 # First graph: feature vs. coyote detections across the whole site
 # Second graph: percent cover of the variable at each camera, separated by array
 # Third graph: percent cover of the variable at each camera, considered over the whole study area 
@@ -274,7 +277,7 @@ figure_10 <- ggarrange(plot_79,
                        plot_87)
 
 
-# Visualizing natural features  -----------------------------------------
+# 2e. Visualizing natural features  -----------------------------------------
 # First graph: feature vs. coyote detections across the whole site
 # Second graph: percent cover of the variable at each camera, separated by array
 # Third graph: percent cover of the variable at each camera, considered over the whole study area
@@ -385,7 +388,7 @@ figure_11 <- ggarrange(plot_88,
                        plot_92,
                        plot_93)
 
-# Visualizing narrow features ----------------------------------------
+# 2f. Visualizing narrow features ----------------------------------------
 # First graph: feature vs. coyote detections across the whole site
 # Second graph: percent cover of the variable at each camera, separated by array
 # Third graph: percent cover of the variable at each camera, considered over the whole study area
@@ -531,7 +534,7 @@ figure_12 <- ggarrange(plot_94,
                        plot_101)
 
 
-#  Visualizing animals --------------------------------------------
+# 2g. Visualizing animals --------------------------------------------
 # First graph: feature vs. coyote detections across the whole site
 # Second graph: percent cover of the variable at each camera, separated by array
 # Third graph: percent cover of the variable at each camera, considered over the whole study area 
@@ -769,7 +772,6 @@ chart.Correlation(project_data[c("pipeline", "transmission_line", "road_gravel_1
 # Broadleaf and conifer -0.66, merge later
 # Broadleaf and deer 0.63, not independant variables in a model
 
-
 # 3d. Dealing with correlated variables and merging for modelling  --------
 
 # Wide: pipeline and transmission line merged into infrastructure_line, merging road_gravel_1l and road_gravel_2l into gravel_road
@@ -807,9 +809,9 @@ chart.Correlation(project_data[c("infrastructure_line", "gravel_road", "trail", 
 # infrastructure_line and gravel_road are at 0.59 *** pretty high!
 # shrub and forest -0.55 *** pretty high! when I combine shrub and forest then they are highly correlated with grass. This might just be unavoidable with natural features?
 
-# 5. Proportional binomial model time -------------------------------------
+# 4. Proportional binomial model time -------------------------------------
 
-# 5a. Anticipated models ------------------------------------------------------
+# 4a. Anticipated models ------------------------------------------------------
 # H0: Null, coyotes ~ 
 
 # H1: Coyotes like wide features, coyotes ~ infrastructure_line + gravel_road
@@ -828,8 +830,7 @@ chart.Correlation(project_data[c("infrastructure_line", "gravel_road", "trail", 
 
 # H8: Baseline world without humans, coyotes ~ water + shrub + grass + forest
 
-
-# 5c. Models --------------------------------------------------------------
+# 4c. Models --------------------------------------------------------------
 
 # H0: Null, coyotes ~ 
 H0 <- glm(
@@ -956,27 +957,27 @@ summary(H8)
 #Residual deviance: 417.55 on 142 degrees of freedom
 #AIC: 697.42
 
-# 5d. Post-model assumption testing ----------------------------------------
+# 5 Post-model assumption testing ----------------------------------------
 
-# Homogeneity of Variance -------------------------------------------------
+# 5a. Homogeneity of Variance -------------------------------------------------
 #We don't have any factor variables (groups) in our model so we don't need to test this assumption. 
 
-# Dispersion --------------------------------------------------------------
+# 5b. Dispersion --------------------------------------------------------------
 # Proportional binomial model doesn't care about this
 
-# Pseudo r^2 for the normality of residuals --------------------------------------------------------------
+# 5c. Pseudo r^2 for the normality of residuals --------------------------------------------------------------
 # *** to be done ***
 
-# 5e. Interpreting model output -------------------------------------------
+# 6. Interpreting model output -------------------------------------------
 ### **** ##### ****** Plotting odds ratios (would be good to see if any variables with large standard error that should be tossed from modelling), graphing predictions ##### **** #### ***** 
 # *** Graphing crew! 
 
-# 6. Model Selection ------------------------------------------------------
+# 7. Model Selection ------------------------------------------------------
 model_selection <- model.sel(H0, H1, H2, H3, H4, H5, H6, H7, H8) 
 
 model_selection
 
-# 7. Plot models -----------------------------------------------------------
+# 8. Plot models -----------------------------------------------------------
 ### **** ##### ****** Plot function (only care about one, is it residuals vs fitted?), cant do AUC, Marissa was looking into pseudo R^2 - ask? ##### **** #### ***** 
 # *** Graphing crew! 
 
