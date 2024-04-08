@@ -279,9 +279,9 @@ plot_1 <- ggplot(data = H3_odds,aes(x = term, y = estimate)) +
              alpha = 0.5) +
   
   # rename the x axis labels
-  scale_x_discrete(labels = c('transmission line',
+  scale_x_discrete(labels = c('infrastructure lines',
                               'gravel roads',
-                              'snowshoe hare',
+                              'snowshoe hares',
                               'white-tailed deer',
                               'moose')) +
   
