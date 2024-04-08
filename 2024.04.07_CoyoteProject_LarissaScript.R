@@ -968,11 +968,57 @@ summary(H8)
 # Proportional binomial model doesn't care about this
 
 # 5c. Pseudo r^2 for the normality of residuals --------------------------------------------------------------
-# *** to be done ***
+# 1 - (Residual Deviance/Null Deviance)
+
+#H0
+summary(H0)
+1 - (695.64/695.64)
+# 0 
+
+#H1
+summary(H1)
+1 - (578.43/695.64)
+# 0.1684923
+
+#H2
+summary(H2)
+1 - (577.54/694.64)
+# 0.1685765
+
+#H3
+summary(H3)
+1 - (438.37/695.64)
+# 0.3698321
+
+# H4
+summary(H4)
+1 - (641.48/695.64)
+# 0.07785636
+
+# H5
+summary(H5)
+1 - (634.80/695.64)
+# 0.08745903
+
+# H6
+summary(H6)
+1 - (464.51/695.64)
+# 0.3322552
+
+# H7
+summary(H7)
+1 - (508.88/695.64)
+# 0.2684722
+
+# H8
+summary(H8)
+1 - (453.69/695.64)
+# 0.3478092
 
 # 6. Interpreting model output -------------------------------------------
 ### **** ##### ****** Plotting odds ratios (would be good to see if any variables with large standard error that should be tossed from modelling), graphing predictions ##### **** #### ***** 
 # *** Graphing crew! 
+# Exampling in Jamie's code at the bottom: https://github.com/larissaissabron/ES482_CoyoteProject/blob/main/coyote_glm.R 
 
 # 7. Model Selection ------------------------------------------------------
 model_selection <- model.sel(H0, H1, H2, H3, H4, H5, H6, H7, H8) 
