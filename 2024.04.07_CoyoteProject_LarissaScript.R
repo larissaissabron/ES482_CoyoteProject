@@ -1078,6 +1078,10 @@ ggplot(data = H3_odds,
   theme(panel.grid = element_blank(),
         axis.title.y = element_blank())
 
+
+# Plot model --------------------------------------------------------------
+plot(H3)
+
 # Exampling in Jamie's code at the bottom: https://github.com/larissaissabron/ES482_CoyoteProject/blob/main/coyote_glm.R 
 
 # 4i. Model Selection ------------------------------------------------------
@@ -1340,6 +1344,10 @@ ggplot(data = H3_nb_odds,
   theme(panel.grid = element_blank(),
         axis.title.y = element_blank())
 
+
+# Plot model --------------------------------------------------------------
+
+plot(H3_nb)
 
 # Predicted probabilities **this doesn't work yet...just copied from Marissa's with inputs from our coyote project..needs to be debugged**-------------------------------------------------
 # first create a new data frame that includes all variables in the model (spelled EXACTLY the same) and where one variable (the one we want to graph) has a range from the min to max value in our data and the other variables are held constant at the mean value from the data.
