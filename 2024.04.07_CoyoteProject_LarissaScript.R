@@ -15,6 +15,7 @@ library(gridExtra)
 library(MASS)
 library(dplyr)
 library(MuMIn)
+library(broom)
 
 # 1b. Confirm working directory where you want it -------------------------
 print(getwd())
@@ -1019,6 +1020,64 @@ summary(H8)
 # 4h. Interpreting model output -------------------------------------------
 ### **** ##### ****** Plotting odds ratios (would be good to see if any variables with large standard error that should be tossed from modelling), graphing predictions ##### **** #### ***** 
 # *** Graphing crew! 
+
+# Pseudo r^2 --------------------------------------------------------------
+# Just checking H3 right now as it was the top model 
+# Equation: 1 - (Residual Deviance/Null Deviance)
+summary(H3)
+1 - (438.37/695.64)
+# 0.3698321
+
+# Odds ratio --------------------------------------------------------------
+# Just checking H3 right now as it was the top model 
+exp(coefficients(H3))
+
+H3_odds <- 
+  tidy(H3,
+       exponentiate = TRUE,
+       confint.int = TRUE) %>% 
+  
+  # bind the estiamtes with the confidence intervals from the model
+  cbind(exp(confint(H3))) %>% 
+  
+  # change format to a tibble so works nicely with ggplot
+  as_tibble() %>% 
+  
+  rename(lower = '2.5 %',
+         upper = '97.5 %') %>% 
+  
+  filter(term != '(Intercept)')
+
+# specify data and mapping asesthetics
+ggplot(data = H3_odds,
+       aes(x = term,
+           y = estimate)) +
+  
+  # add points for the odss
+  geom_point() +
+  
+  # add errorbars for the confidence intervals
+  geom_errorbar(aes(ymin = lower,
+                    ymax = upper),
+                linewidth = 0.5,
+                width = 0.4) +
+  
+  geom_hline(yintercept = 1,
+             alpha = 0.5) +
+  
+  # rename y axis title
+  ylab('Odds ratio') +
+  
+  # flip x and y axis 
+  coord_flip() +
+  
+  # specify theme
+  theme_bw() +
+  
+  # specify theme elements
+  theme(panel.grid = element_blank(),
+        axis.title.y = element_blank())
+
 # Exampling in Jamie's code at the bottom: https://github.com/larissaissabron/ES482_CoyoteProject/blob/main/coyote_glm.R 
 
 # 4i. Model Selection ------------------------------------------------------
@@ -1219,8 +1278,119 @@ summary(H8_nb)
 
 ###
 
-
 # Model Selection ---------------------------------------------------------
 model_selection_nb <- model.sel(H0_nb, H1_nb, H2_nb, H3_nb, H4_nb, H5_nb, H6_nb, H7_nb, H8_nb) 
 
 model_selection_nb
+
+# Pseudo r^2 --------------------------------------------------------------
+# Just checking H3 right now as it was the top model 
+# Equation: 1 - (Residual Deviance/Null Deviance)
+summary(H3_nb)
+1 - (173.59/234.51)
+# 0.2598
+
+# Odds ratio --------------------------------------------------------------
+# Just checking H3 right now as it was the top model 
+exp(coefficients(H3_nb))
+
+H3_nb_odds <- 
+  tidy(H3_nb,
+       exponentiate = TRUE,
+       confint.int = TRUE) %>% 
+  
+  # bind the estiamtes with the confidence intervals from the model
+  cbind(exp(confint(H3_nb))) %>% 
+  
+  # change format to a tibble so works nicely with ggplot
+  as_tibble() %>% 
+  
+  rename(lower = '2.5 %',
+         upper = '97.5 %') %>% 
+  
+  filter(term != '(Intercept)')
+
+# specify data and mapping asesthetics
+ggplot(data = H3_nb_odds,
+       aes(x = term,
+           y = estimate)) +
+  
+  # add points for the odss
+  geom_point() +
+  
+  # add errorbars for the confidence intervals
+  geom_errorbar(aes(ymin = lower,
+                    ymax = upper),
+                linewidth = 0.5,
+                width = 0.4) +
+  
+  geom_hline(yintercept = 1,
+             alpha = 0.5) +
+  
+  # rename y axis title
+  ylab('Odds ratio') +
+  
+  # flip x and y axis 
+  coord_flip() +
+  
+  # specify theme
+  theme_bw() +
+  
+  # specify theme elements
+  theme(panel.grid = element_blank(),
+        axis.title.y = element_blank())
+
+
+# Predicted probabilities **this doesn't work yet...just copied from Marissa's with inputs from our coyote project..needs to be debugged**-------------------------------------------------
+# first create a new data frame that includes all variables in the model (spelled EXACTLY the same) and where one variable (the one we want to graph) has a range from the min to max value in our data and the other variables are held constant at the mean value from the data.
+
+# let's start with coyote total detections
+H3_nb_predict <- expand.grid(coy_tot_det = seq(min(project_data$coy_tot_det), 
+                                              max(project_data$coy_tot_det),
+                                              by = 1),
+                             infrastructure_line = mean(project_data$infrastructure_line),
+                             gravel_road = mean(project_data$gravel_road),
+                             deer_tot_det = mean(project_data$deer_tot_det),
+                             hare_tot_det = mean(project_data$hare_tot_det),
+                             moose_tot_det = mean(project_data$moose_tot_det))
+
+head(H3_nb_predict)
+
+# use predict function to get predicted probabilities of coyote total detections based on our model
+H3_nb_predict$pred <- predict(H3_nb,
+                              type = 'response',
+                              newdata = H3_nb_predict)
+
+# look at what we created
+head(H3_nb_predict)
+
+# use predict function to get predicted probabilities of cow damage based on our model
+H3_nb_predict_2 <- predict(H3_nb,
+                              type = 'response',
+                              se.fit = TRUE,
+                              newdata = H3_nb_predict)
+
+head(H3_nb_predict_2)
+
+# graphings set up
+H3_nb_predict_2 <- cbind(H3_nb_predict,
+                         H3_nb_predict_2) %>% 
+  
+  # add column for lower and upper 95% CI using manual calculation from SE
+  mutate(lwr = fit - (1.96*se.fit),
+         upr = fit + (1.96*se.fit))
+
+head(H3_nb_predict_2)
+
+# Graphs ----------------------
+
+# create graph with predicted prob x bear abundance
+ggplot(data = H3_nb_predict_2, aes(x = coy_tot_det, y = fit)) +
+  
+  # add line for predicted prob
+  geom_line() +
+  
+  # add error bar
+  geom_ribbon(aes(ymin = lwr,
+                  ymax = upr),
+              alpha = 0.5) # changes opacity so you can see the main line
