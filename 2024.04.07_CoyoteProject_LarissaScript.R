@@ -832,7 +832,7 @@ chart.Correlation(project_data[c("infrastructure_line", "gravel_road", "trail", 
 
 # H8: Baseline world without humans, coyotes ~ water + shrub + grass + forest
 
-# 4c. Models --------------------------------------------------------------
+# 4c. Proportional Binomial Models --------------------------------------------------------------
 
 # H0: Null, coyotes ~ 
 H0 <- glm(
@@ -959,15 +959,15 @@ summary(H8)
 #Residual deviance: 417.55 on 142 degrees of freedom
 #AIC: 697.42
 
-# 5 Post-model assumption testing ----------------------------------------
+# 4d Post-model assumption testing ----------------------------------------
 
-# 5a. Homogeneity of Variance -------------------------------------------------
+# 4e. Homogeneity of Variance -------------------------------------------------
 #We don't have any factor variables (groups) in our model so we don't need to test this assumption. 
 
-# 5b. Dispersion --------------------------------------------------------------
+# 4f. Dispersion --------------------------------------------------------------
 # Proportional binomial model doesn't care about this
 
-# 5c. Pseudo r^2 for the normality of residuals --------------------------------------------------------------
+# 4g. Pseudo r^2 for the normality of residuals --------------------------------------------------------------
 
 # Equation: 1 - (Residual Deviance/Null Deviance)
 
@@ -1016,17 +1016,211 @@ summary(H8)
 1 - (453.69/695.64)
 # 0.3478092
 
-# 6. Interpreting model output -------------------------------------------
+# 4h. Interpreting model output -------------------------------------------
 ### **** ##### ****** Plotting odds ratios (would be good to see if any variables with large standard error that should be tossed from modelling), graphing predictions ##### **** #### ***** 
 # *** Graphing crew! 
 # Exampling in Jamie's code at the bottom: https://github.com/larissaissabron/ES482_CoyoteProject/blob/main/coyote_glm.R 
 
-# 7. Model Selection ------------------------------------------------------
+# 4i. Model Selection ------------------------------------------------------
 model_selection <- model.sel(H0, H1, H2, H3, H4, H5, H6, H7, H8) 
 
 model_selection
 
-# 8. Plot models -----------------------------------------------------------
+# 4j. Plot models -----------------------------------------------------------
 ### **** ##### ****** Plot function (only care about one, is it residuals vs fitted?), cant do AUC, Marissa was looking into pseudo R^2 - ask? ##### **** #### ***** 
 # *** Graphing crew! 
 
+
+# 5. Negative Binomial Model Time -----------------------------------------
+
+# 5a. Anticipated models (same as section 4) ------------------------------------------------------
+# H0: Null, coyotes ~ 
+
+# H1: Coyotes like wide features, coyotes ~ infrastructure_line + gravel_road
+
+# H2: Coyote use of wide features depends on the presence of wolf competitors, coyote ~ infrastructure_line + gravel_road + infrastructure_line:wolf_tot_det + gravel_road:wolf_tot_det
+
+# H3: Coyote use of wide features varies with the presence of prey, coyote ~ infrastructure_line + gravel_road + deer_tot_det + hare_tot_det + moose_tot_det
+
+# H4: Coyotes like narrow features, coyote ~ trail + seismic_line + road_unimproved
+
+# H5: Coyote use of narrow features depends on presence of a competitor, coyote ~ trail + seismic_line  + road_unimproved + trail:wolf_tot_det + seismic_line:wolf_tot_det + road_unimproved:wolf_tot_det
+
+# H6: Coyote use of narrow features also varies with the presence of prey, coyotes ~ trail + seismic_line + road_unimproved + deer_tot_det + hare_tot_det + moose_tot_det
+
+# H7: Coyotes like both wide and narrow features, coyote ~ infrastructure_line + gravel_road + trail + seismic_line + road_unimproved
+
+# H8: Baseline world without humans, coyotes ~ water + shrub + grass + forest
+
+
+# 5b. Models --------------------------------------------------------------
+# Already know that the data is overdispersed based on the chi square for residual deviance from previous trial of glm with poisson distribution (https://github.com/larissaissabron/ES482_CoyoteProject/blob/main/2024.04.04_Larissa_CoyoteProject.R). This is why we aren't doing a typical glm, instead negative binomial. 
+
+# H0: Null
+H0_nb <- glm.nb(coy_tot_det ~ 1,
+                   data = project_data,
+                   link = "log")
+
+summary(H0_nb)
+
+# Residual deviance: 170.06  on 153  degrees of freedom
+# AIC: 873.74
+
+# = residual deviance / degrees of freedom
+170.06/153 # = 1.111503
+
+# H1: Coyotes like wide features, coyotes ~ infrastructure_line + gravel_road
+H1_nb <- glm.nb(coy_tot_det ~
+                  scale(infrastructure_line) +
+                  scale(gravel_road),
+                   data = project_data,
+                   link = "log")
+
+summary (H1_nb)
+# Residual deviance: 171.03  on 151  degrees of freedom
+# AIC: 859.23
+
+# = residual deviance / degrees of freedom
+171.03/151 # = 1.132649
+
+# H2: Coyote use of wide features depends on the presence of wolf competitors, coyote ~ infrastructure_line + gravel_road + infrastructure_line:wolf_tot_det + gravel_road:wolf_tot_det
+
+H2_nb <- glm.nb(coy_tot_det ~ 
+    scale(infrastructure_line) + 
+    scale(gravel_road) +
+    scale(infrastructure_line):scale(wolf_tot_det) +
+    scale(gravel_road):scale(wolf_tot_det),
+  data = project_data,
+  link = "log")
+
+summary (H2_nb)
+
+#Residual deviance: 171.02  on 149  degrees of freedom
+#AIC: 862.59
+
+# = residual deviance / degrees of freedom
+171.02/149 # = 1.147785
+
+# H3: Coyote use of wide features varies with the presence of prey, coyote ~ infrastructure_line + gravel_road + deer_tot_det + hare_tot_det + moose_tot_det
+H3_nb <- glm.nb(
+  coy_tot_det ~ 
+    scale(infrastructure_line) + 
+    scale(gravel_road) +
+    scale(deer_tot_det) +
+    scale(hare_tot_det) +
+    scale(moose_tot_det),
+  data = project_data,
+  link = "log")
+
+summary (H3_nb)
+
+# Warning message:
+#In glm.nb(coy_tot_det ~ scale(infrastructure_line) + #scale(gravel_road) +  :
+#            alternation limit reached
+
+# Residual deviance: 173.59  on 148  degrees of freedom
+# AIC: 834.55
+
+# = residual deviance / degrees of freedom
+173.59/148 # = 1.172905
+
+# H4: Coyotes like narrow features, coyote ~ trail + seismic_line + road_unimproved
+H4_nb <- glm.nb(
+  coy_tot_det ~ 
+    scale(trail) +
+    scale(seismic_line) +
+    scale(road_unimproved),
+  data = project_data,
+  link = "log")
+
+summary(H4_nb)
+#Residual deviance: 170.16  on 150  degrees of freedom
+#AIC: 870.05
+
+# = residual deviance / degrees of freedom
+170.16/150 # = 1.1344
+
+# H5: Coyote use of narrow features depends on presence of a competitor, coyote ~ trail + seismic_line  + road_unimproved + trail:wolf_tot_det + seismic_line:wolf_tot_det + road_unimproved:wolf_tot_det
+H5_nb <- glm.nb(
+  coy_tot_det ~ 
+    scale(trail) +
+    scale(seismic_line) +
+    scale(road_unimproved) +
+    scale(trail):scale(wolf_tot_det) +
+    scale(seismic_line):scale(wolf_tot_det) +
+    scale(road_unimproved):scale(wolf_tot_det),
+  data = project_data,
+  link = "log")
+
+summary(H5_nb)
+#Residual deviance: 170.30  on 147  degrees of freedom
+#AIC: 874.65
+
+# = residual deviance / degrees of freedom
+170.30/147 # = 1.158503
+
+# H6: Coyote use of narrow features also varies with the presence of prey, coyotes ~ trail + seismic_line + road_unimproved + deer_tot_det + hare_tot_det + moose_tot_det
+H6_nb <- glm.nb(
+  coy_tot_det ~ 
+    scale(trail) +
+    scale(seismic_line) +
+    scale(road_unimproved) +
+    scale(deer_tot_det) +
+    scale(hare_tot_det) +
+    scale(moose_tot_det),
+  data = project_data,
+  link = "log")
+
+# Warning message:
+#In glm.nb(coy_tot_det ~ scale(trail) + scale(seismic_line) + scale(road_unimproved) +  :
+#            alternation limit reached
+
+summary(H6_nb)
+#Residual deviance: 173.18  on 147  degrees of freedom
+#AIC: 842
+
+# = residual deviance / degrees of freedom
+173.18/147 # = 1.178095
+
+# H7: Coyotes like both wide and narrow features, coyote ~ infrastructure_line + gravel_road + trail + seismic_line + road_unimproved
+H7_nb <- glm.nb(
+  coy_tot_det ~ 
+    scale(infrastructure_line) + 
+    scale(gravel_road) +
+    scale(trail) +
+    scale(seismic_line) +
+    scale(road_unimproved),
+  data = project_data,
+  link = "log")
+
+summary(H7_nb)
+#Residual deviance: 171.79  on 148  degrees of freedom
+#AIC: 843.2
+
+# = residual deviance / degrees of freedom
+171.79/148 # = 1.160743
+
+# H8: Baseline world without humans, coyotes ~ water + shrub + grass + forest
+H8_nb <- glm.nb(
+  coy_tot_det ~ 
+    scale(water) +
+    scale(shrub) +
+    scale(grass) +
+    scale(forest),
+  data = project_data,
+  link = "log")
+
+summary(H8_nb)
+#Residual deviance: 173.09  on 149  degrees of freedom
+#AIC: 835.69
+
+# = residual deviance / degrees of freedom
+173.09/149 # = 1.161678
+
+###
+
+
+# Model Selection ---------------------------------------------------------
+model_selection_nb <- model.sel(H0_nb, H1_nb, H2_nb, H3_nb, H4_nb, H5_nb, H6_nb, H7_nb, H8_nb) 
+
+model_selection_nb
