@@ -13,6 +13,7 @@ library(rphylopic)
 library(MuMIn)
 library(AER)
 library(broom)
+library(pROC)
 
 # redoing exploration with total detections and poisson glm
 
@@ -461,21 +462,20 @@ plot_1
 # models
 
 H0 <- glm.nb(coyote ~ 1,
-          data = project_data2)
+          data = project_data2,
+          link = "log")
 
 summary(H0)
-#Residual deviance: 654.45  on 146  degrees of freedom
-#AIC: 926.33
+
 
 # H1: Coyotes like wide features, coyotes ~ infrastructure_line + gravel_road
 H1 <- glm.nb(coyote ~ 
             scale(infrastructure_line) + 
             scale(gravel_road),
-          data = project_data2)
+          data = project_data2,
+          link = "log")
 
 summary(H1)
-#Residual deviance: 541.08  on 144  degrees of freedom
-#AIC: 816.96
 
 # H2: Coyote use of wide features depends on the presence of wolf competitors, coyote ~ infrastructure_line + gravel_road + infrastructure_line:wolf_tot_det + gravel_road:wolf_tot_det
 H2 <- glm.nb(
@@ -484,11 +484,11 @@ H2 <- glm.nb(
     scale(gravel_road) +
     scale(infrastructure_line):scale(wolf) +
     scale(gravel_road):scale(wolf),
-  data = project_data2)
+  data = project_data2,
+  link = "log")
 
 summary(H2)
-#Residual deviance: 540.26  on 142  degrees of freedom
-#AIC: 820.13
+
 
 # H3: Coyote use of wide features varies with the presence of prey, coyote ~ infrastructure_line + gravel_road + deer_tot_det + hare_tot_det + moose_tot_det
 H3 <- glm.nb(
@@ -498,27 +498,28 @@ H3 <- glm.nb(
     scale(deer) +
     scale(hare) +
     scale(moose),
-  data = project_data2)
+  data = project_data2,
+  link = "log")
 
 summary(H3)
 #Residual deviance: 401.59  on 141  degrees of freedom
 #AIC: 683.46
 
 # H4: Coyotes like narrow features, coyote ~ trail + seismic_line + road_unimproved
-H4 <- glm(
+H4 <- glm.nb(
   coyote ~ 
     scale(trail) +
     scale(seismic_line) +
     scale(road_unimproved),
   data = project_data2,
-  family = binomial)
+  link = "log")
 
 summary(H4)
 #Residual deviance: 604.42 on 143  degrees of freedom
 #AIC: 882.29
 
 # H5: Coyote use of narrow features depends on presence of a competitor, coyote ~ trail + seismic_line  + road_unimproved + trail:wolf_tot_det + seismic_line:wolf_tot_det + road_unimproved:wolf_tot_det
-H5 <- glm(
+H5 <- glm.nb(
   coyote ~ 
     scale(trail) +
     scale(seismic_line) +
@@ -527,14 +528,14 @@ H5 <- glm(
     scale(seismic_line):scale(wolf) +
     scale(road_unimproved):scale(wolf),
   data = project_data2,
-  family = binomial)
+  link = "log")
 
 summary(H5)
 #Residual deviance: 599.09  on 140  degrees of freedom
 #AIC: 882.96
 
 # H6: Coyote use of narrow features also varies with the presence of prey, coyotes ~ trail + seismic_line + road_unimproved + deer_tot_det + hare_tot_det + moose_tot_det
-H6 <- glm(
+H6 <- glm.nb(
   coyote ~ 
     scale(trail) +
     scale(seismic_line) +
@@ -543,14 +544,14 @@ H6 <- glm(
     scale(hare) +
     scale(moose),
   data = project_data2,
-  family = binomial)
+  link = "log")
 
 summary(H6)
 #Residual deviance: 424.96  on 140  degrees of freedom
 #AIC: 708.83
 
 # H7: Coyotes like both wide and narrow features, coyote ~ infrastructure_line + gravel_road + trail + seismic_line + road_unimproved
-H7 <- glm(
+H7 <- glm.nb(
   coyote ~ 
     scale(infrastructure_line) + 
     scale(gravel_road) +
@@ -558,21 +559,21 @@ H7 <- glm(
     scale(seismic_line) +
     scale(road_unimproved),
   data = project_data2,
-  family = binomial)
+  link = "log")
 
 summary(H7)
 #Residual deviance: 476.83  on 141  degrees of freedom
 #AIC: 758.7
 
 # H8: Baseline world without humans, coyotes ~ water + shrub + grass + forest
-H8 <- glm(
+H8 <- glm.nb(
   coyote ~ 
     scale(water) +
     scale(shrub) +
     scale(grass) +
     scale(forest),
   data = project_data2,
-  family = binomial)
+  link = "log")
 
 summary(H8)  
 
@@ -630,3 +631,93 @@ plot_1 <- ggplot(data = H3_odds,aes(x = term, y = estimate)) +
         axis.title.y = element_blank())
 
 plot_1 
+
+
+# Predicted probability -------------------------------------------------
+
+
+# inverse logit of coefficients to get probabilities 
+plogis(coefficients(H3))
+
+H3_nb_predict <- expand.grid(coyote = seq(min(project_data2$coyote), 
+                                               max(project_data2$coyote),
+                                               by = 1),
+                             infrastructure_line = mean(project_data2$infrastructure_line),
+                             gravel_road = mean(project_data2$gravel_road),
+                             deer = mean(project_data2$deer),
+                             hare = mean(project_data2$hare),
+                             moose = mean(project_data2$moose))
+
+head(H3_nb_predict)
+
+# use predict function to get predicted probabilities of coyote total detections based on our model
+H3_nb_predict$pred <- predict(H3,
+                              type = 'response',
+                              newdata = H3_nb_predict)
+
+# look at what we created
+head(H3_nb_predict)
+
+# use predict function to get predicted probabilities of cow damage based on our model
+H3_nb_predict_2 <- predict(H3,
+                           type = 'response',
+                           se.fit = TRUE,
+                           newdata = H3_nb_predict)
+
+head(H3_nb_predict_2)
+
+# graphings set up
+H3_nb_predict_2 <- cbind(H3_nb_predict,
+                         H3_nb_predict_2) %>% 
+  
+  # add column for lower and upper 95% CI using manual calculation from SE
+  mutate(lwr = fit - (1.96*se.fit),
+         upr = fit + (1.96*se.fit))
+
+head(H3_nb_predict_2)
+
+ggplot(data = H3_nb_predict_2, aes(x = coyote, y = fit)) +
+  
+  # add line for predicted prob
+  geom_line() +
+  
+  # add error bar
+  geom_ribbon(aes(ymin = lwr,
+                  ymax = upr),
+              alpha = 0.5) # changes opacity so you can see the main line
+
+
+# maddys code -------------------------------------------------------------
+
+project_data2$pred_coyote <- predict(H3, type = "response") # unsure about this/ the math behind it, will look into it 
+
+## infrastructure line ----
+
+inf_line_plot <- ggplot(project_data2, aes(x = infrastructure_line, y = pred_coyote)) +
+  geom_point() +  # Use geom_point to plot points
+  geom_smooth(method = "glm", method.args = list(family = "binomial")) +  # Add smoothed line based on the GLM
+  labs(x = "Infrastructure Line",
+       y = "Probability of Coyote Presence") +
+  theme(legend.position = "NONE",
+        panel.background = element_blank(),
+        panel.border = element_rect(fill = NA),
+        axis.text.x = element_text(size = 15),
+        axis.text.y = element_text(size = 15),
+        axis.title.x = element_text(size = 15),
+        axis.title.y = element_text(size = 15))
+
+inf_line_plot
+
+
+# Plotting Models ---------------------------------------------------------
+
+plot(H3)
+# output graphs in figures folder
+
+# area under curve
+c.roccurve <- roc(project_data2$coyote, 
+                  predict(H3, type = 'response'))
+
+auc(c.roccurve)
+
+plot.roc(c.roccurve, main="Area Under the Curve for best model (H3)")
