@@ -691,13 +691,16 @@ ggplot(data = H3_nb_predict_2, aes(x = coyote, y = fit)) +
 
 project_data2$pred_coyote <- predict(H3, type = "response") # unsure about this/ the math behind it, will look into it 
 
+# remove outlier
+project_data2 <- filter(project_data2, pred_coyote < 40)
+
 ## infrastructure line ----
 
 inf_line_plot <- ggplot(project_data2, aes(x = infrastructure_line, y = pred_coyote)) +
   geom_point() +  # Use geom_point to plot points
-  geom_smooth(method = "glm", method.args = list(family = "binomial")) +  # Add smoothed line based on the GLM
+  geom_smooth(method = "glm") +  
   labs(x = "Infrastructure Line",
-       y = "Probability of Coyote Presence") +
+       y = "Probability of Coyote Count") +
   theme(legend.position = "NONE",
         panel.background = element_blank(),
         panel.border = element_rect(fill = NA),
@@ -708,6 +711,70 @@ inf_line_plot <- ggplot(project_data2, aes(x = infrastructure_line, y = pred_coy
 
 inf_line_plot
 
+## gravel road ----
+
+gravel_road_plot <- ggplot(project_data2, aes(x = gravel_road, y = pred_coyote)) +
+  geom_point() +  # Use geom_point to plot points
+  geom_smooth(method = "glm") +  # Add smoothed line based on the GLM
+  labs(x = "Gravel Road",
+       y = "Probability of Coyote Count") +
+  theme(legend.position = "NONE",
+        panel.background = element_blank(),
+        panel.border = element_rect(fill = NA),
+        axis.text.x = element_text(size = 15),
+        axis.text.y = element_text(size = 15),
+        axis.title.x = element_text(size = 15),
+        axis.title.y = element_text(size = 15))
+
+## deer ----
+
+deer_plot <- ggplot(project_data2, aes(x = deer, y = pred_coyote)) +
+  geom_point() +  # Use geom_point to plot points
+  geom_smooth(method = "glm")+  # Add smoothed line based on the GLM
+  labs(x = "Deer",
+       y = "Probability of Coyote Count") +
+  theme(legend.position = "NONE",
+        panel.background = element_blank(),
+        panel.border = element_rect(fill = NA),
+        axis.text.x = element_text(size = 15),
+        axis.text.y = element_text(size = 15),
+        axis.title.x = element_text(size = 15),
+        axis.title.y = element_text(size = 15))
+
+## hare ----
+
+hare_plot <- ggplot(project_data2, aes(x = hare, y = pred_coyote)) +
+  geom_point() +  # Use geom_point to plot points
+  geom_smooth(method = "glm") +  # Add smoothed line based on the GLM
+  labs(x = "Hare",
+       y = "Probability of Coyote Count") +
+  theme(legend.position = "NONE",
+        panel.background = element_blank(),
+        panel.border = element_rect(fill = NA),
+        axis.text.x = element_text(size = 15),
+        axis.text.y = element_text(size = 15),
+        axis.title.x = element_text(size = 15),
+        axis.title.y = element_text(size = 15))
+
+## moose ----
+
+moose_plot <- ggplot(project_data2, aes(x = moose, y = pred_coyote)) +
+  geom_point() +  # Use geom_point to plot points
+  geom_smooth(method = "glm") +  # Add smoothed line based on the GLM
+  labs(x = "Moose",
+       y = "Probability of Coyote Count") +
+  theme(legend.position = "NONE",
+        panel.background = element_blank(),
+        panel.border = element_rect(fill = NA),
+        axis.text.x = element_text(size = 15),
+        axis.text.y = element_text(size = 15),
+        axis.title.x = element_text(size = 15),
+        axis.title.y = element_text(size = 15))
+
+
+figure_1 <- ggarrange(inf_line_plot, gravel_road_plot, deer_plot, hare_plot, moose_plot)
+
+figure_1
 
 # Plotting Models ---------------------------------------------------------
 
